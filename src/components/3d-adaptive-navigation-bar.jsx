@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useSpring, AnimatePresence } from "framer-motion";
+import { Home, User, Briefcase, Layers, MessageSquare, Mail } from "lucide-react";
 
 /**
  * 3D Adaptive Navigation Pill
- * Smart navigation with scroll detection, responsive layout sizing, and hover expansion
+ * Smart navigation with scroll detection, responsive layout sizing, and hover expansion.
+ * On mobile (< 640px), expanded state renders Lucide icons instead of text labels
+ * to prevent overflow on tight viewports.
  */
 export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) => {
   const [expanded, setExpanded] = useState(false);
@@ -16,13 +19,17 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
   const hoverTimeoutRef = useRef(null);
   const prevSectionRef = useRef("home");
 
-  // New navigation items array
+  // Convenience flag — used throughout for responsive branching
+  const isMobile = screenWidth < 640;
+
+  // Navigation items with matched Lucide icon components
   const navItems = [
-    { label: "Home", id: "home" },
-    { label: "About Us", id: "about" },
-    { label: "Our Services", id: "services" },
-    { label: "Our Works", id: "works" },
-    { label: "Contact Us", id: "contact" },
+    { label: "Home",        id: "home",         icon: Home          },
+    { label: "About Us",    id: "about",         icon: User          },
+    { label: "Our Services",id: "services",      icon: Briefcase     },
+    { label: "Our Works",   id: "works",         icon: Layers        },
+    { label: "Reviews",     id: "testimonials",  icon: MessageSquare },
+    { label: "Contact Us",  id: "contact",       icon: Mail          },
   ];
 
   // Monitor screen width adjustments seamlessly
@@ -32,16 +39,18 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Adjusted widths slightly to fit 6 items cleanly across responsive viewport sizes
+  // Adjusted widths:
+  // - Mobile icons are much narrower than text labels, so 260px is snug and balanced.
+  // - Desktop retains original generous widths for full text labels.
   const getMaxExpandedWidth = () => {
-    if (screenWidth < 360) return 290;
-    if (screenWidth < 640) return 340;
-    if (screenWidth < 1024) return 680;
-    return 760;
+    if (screenWidth < 360) return 260;
+    if (screenWidth < 640) return 260;   // ← reduced from 310/350: icons fit tighter
+    if (screenWidth < 1024) return 720;
+    return 820;
   };
 
   const maxExpandedWidth = getMaxExpandedWidth();
-  const collapsedWidth = screenWidth < 640 ? 125 : 150;
+  const collapsedWidth = isMobile ? 125 : 150;
 
   // Spring animations for smooth motion
   const pillWidth = useSpring(collapsedWidth, {
@@ -84,13 +93,8 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
     };
   }, [hovering, pillWidth, collapsedWidth, maxExpandedWidth, onExpandChange]);
 
-  const handleMouseEnter = () => {
-    setHovering(true);
-  };
-
-  const handleMouseLeave = () => {
-    setHovering(false);
-  };
+  const handleMouseEnter = () => setHovering(true);
+  const handleMouseLeave = () => setHovering(false);
 
   const handleSectionClick = (sectionId) => {
     setIsTransitioning(true);
@@ -107,22 +111,21 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
     setExpanded(false);
     if (onExpandChange) onExpandChange(false);
 
-    setTimeout(() => {
-      setIsTransitioning(false);
-    }, 400);
+    setTimeout(() => setIsTransitioning(false), 400);
   };
 
   const activeItem = navItems.find((item) => item.id === activeSection);
 
   return (
     <motion.nav
+      ref={containerRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onTouchStart={handleMouseEnter} // Better handling for touch screen responses
+      onTouchStart={handleMouseEnter}
       className="relative rounded-full"
       style={{
         width: pillWidth,
-        height: screenWidth < 640 ? "46px" : "56px", // Slightly shorter on mobile devices
+        height: isMobile ? "46px" : "56px",
         background: `
           linear-gradient(135deg, 
             #fcfcfd 0%, 
@@ -213,13 +216,9 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
           left: expanded ? "18%" : "15%",
           top: "16%",
           width: expanded
-            ? screenWidth < 640
-              ? "70px"
-              : "140px"
-            : screenWidth < 640
-              ? "35px"
-              : "60px",
-          height: screenWidth < 640 ? "8px" : "14px",
+            ? isMobile ? "70px" : "140px"
+            : isMobile ? "35px" : "60px",
+          height: isMobile ? "8px" : "14px",
           background:
             "radial-gradient(ellipse at center, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.35) 40%, rgba(255, 255, 255, 0.10) 70%, rgba(255, 255, 255, 0) 100%)",
           filter: "blur(4px)",
@@ -235,8 +234,8 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
           style={{
             right: "22%",
             top: "20%",
-            width: screenWidth < 640 ? "40px" : "80px",
-            height: screenWidth < 640 ? "6px" : "10px",
+            width: isMobile ? "40px" : "80px",
+            height: isMobile ? "6px" : "10px",
             background:
               "radial-gradient(ellipse at center, rgba(255, 255, 255, 0.50) 0%, rgba(255, 255, 255, 0.15) 60%, rgba(255, 255, 255, 0) 100%)",
             filter: "blur(3px)",
@@ -309,13 +308,15 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
 
       {/* Navigation items container */}
       <div
-        className="relative z-10 h-full flex items-center justify-center px-3 sm:px-6"
+        className="relative z-10 h-full flex items-center justify-center px-2 sm:px-6"
         style={{
           fontFamily:
             'Inter, -apple-system, BlinkMacSystemFont, "SF Pro", Poppins, sans-serif',
         }}
       >
-        {/* Collapsed state - show only active section with smooth text transitions */}
+        {/* ─── COLLAPSED STATE ───────────────────────────────────────────────────
+            Always renders the active label as text across all screen sizes,
+            so the pill elegantly morphs closed into a readable text tag.       */}
         {!expanded && (
           <div className="flex items-center relative mix-blend-normal">
             <AnimatePresence mode="wait">
@@ -330,10 +331,10 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
                     ease: [0.4, 0.0, 0.2, 1],
                   }}
                   style={{
-                    fontSize: screenWidth < 640 ? "13px" : "15.5px",
+                    fontSize: isMobile ? "13px" : "15.5px",
                     fontWeight: 680,
                     color: "#1a1a1a",
-                    letterSpacing: screenWidth < 640 ? "0.2px" : "0.45px",
+                    letterSpacing: isMobile ? "0.2px" : "0.45px",
                     whiteSpace: "nowrap",
                     fontFamily:
                       'Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", Poppins, sans-serif',
@@ -354,11 +355,14 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
           </div>
         )}
 
-        {/* Expanded state - show all sections with stagger */}
+        {/* ─── EXPANDED STATE ────────────────────────────────────────────────────
+            Mobile  (< 640px): renders Lucide icons — compact, no overflow risk.
+            Desktop (≥ 640px): renders original full text labels.               */}
         {expanded && (
           <div className="flex items-center justify-evenly w-full gap-0.5 sm:gap-0">
             {navItems.map((item, index) => {
               const isActive = item.id === activeSection;
+              const IconComponent = item.icon;
 
               return (
                 <motion.button
@@ -367,22 +371,22 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   transition={{
-                    delay: index * 0.03, // Snappier stagger animation across 6 items
+                    delay: index * 0.03,
                     duration: 0.2,
                     ease: "easeOut",
                   }}
                   onClick={() => handleSectionClick(item.id)}
                   className="relative cursor-pointer transition-all duration-200 rounded-full"
                   style={{
-                    fontSize:
-                      screenWidth < 640 ? "10px" : isActive ? "15.5px" : "15px", // Scaled down micro font-size layout safely on mobile
+                    fontSize: isMobile ? "9px" : isActive ? "14.5px" : "14px",
                     fontWeight: isActive ? 680 : 510,
                     color: isActive ? "#1a1a1a" : "#656565",
                     textDecoration: "none",
-                    letterSpacing: screenWidth < 640 ? "0.05px" : "0.45px",
+                    letterSpacing: isMobile ? "0.01px" : "0.35px",
                     background: "transparent",
                     border: "none",
-                    padding: screenWidth < 640 ? "4px 6px" : "10px 16px",
+                    // Mobile: square touch target with equal padding; desktop: original
+                    padding: isMobile ? "8px" : "10px 14px",
                     outline: "none",
                     whiteSpace: "nowrap",
                     fontFamily:
@@ -392,19 +396,28 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
                     transform: isActive
                       ? "translateY(-1.5px)"
                       : "translateY(0)",
-                    textShadow: isActive
-                      ? `
-                        0 1px 0 rgba(0, 0, 0, 0.35),
-                        0 -1px 0 rgba(255, 255, 255, 0.8),
-                        1px 1px 0 rgba(0, 0, 0, 0.18),
-                        -1px 1px 0 rgba(0, 0, 0, 0.15)
-                      `
-                      : `
-                        0 1px 0 rgba(0, 0, 0, 0.22),
-                        0 -1px 0 rgba(255, 255, 255, 0.65),
-                        1px 1px 0 rgba(0, 0, 0, 0.12),
-                        -1px 1px 0 rgba(0, 0, 0, 0.10)
-                      `,
+                    // Text shadow kept on desktop text; applied to icon wrapper on mobile too
+                    // for a subtle depth effect consistent with the overall 3D treatment.
+                    filter: isMobile
+                      ? isActive
+                        ? "drop-shadow(0 1px 0 rgba(0,0,0,0.30)) drop-shadow(0 -1px 0 rgba(255,255,255,0.75))"
+                        : "drop-shadow(0 1px 0 rgba(0,0,0,0.18)) drop-shadow(0 -1px 0 rgba(255,255,255,0.55))"
+                      : "none",
+                    textShadow: !isMobile
+                      ? isActive
+                        ? `
+                          0 1px 0 rgba(0, 0, 0, 0.35),
+                          0 -1px 0 rgba(255, 255, 255, 0.8),
+                          1px 1px 0 rgba(0, 0, 0, 0.18),
+                          -1px 1px 0 rgba(0, 0, 0, 0.15)
+                        `
+                        : `
+                          0 1px 0 rgba(0, 0, 0, 0.22),
+                          0 -1px 0 rgba(255, 255, 255, 0.65),
+                          1px 1px 0 rgba(0, 0, 0, 0.12),
+                          -1px 1px 0 rgba(0, 0, 0, 0.10)
+                        `
+                      : "none",
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
@@ -419,7 +432,20 @@ export const PillBase = ({ activeSection, setActiveSection, onExpandChange }) =>
                     }
                   }}
                 >
-                  {item.label}
+                  {isMobile ? (
+                    // ── MOBILE: Lucide icon ──────────────────────────────────
+                    // strokeWidth increases when active to mirror the bold
+                    // font-weight treatment used in desktop text mode.
+                    <IconComponent
+                      size={isActive ? 18 : 16}
+                      strokeWidth={isActive ? 2.5 : 1.8}
+                      color={isActive ? "#1a1a1a" : "#656565"}
+                      aria-label={item.label}
+                    />
+                  ) : (
+                    // ── DESKTOP: original text label ─────────────────────────
+                    item.label
+                  )}
                 </motion.button>
               );
             })}

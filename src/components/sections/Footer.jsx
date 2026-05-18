@@ -145,9 +145,9 @@ export default function Footer() {
       <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_bottom,rgba(180,210,205,0.05)_0%,transparent_35%)]" />
 
       {/* ── Content wrapper ── */}
-      <div className="relative z-10 flex flex-col justify-end min-h-[520px] sm:min-h-[620px] md:min-h-[740px] lg:min-h-[900px] xl:min-h-[1020px] 2xl:min-h-[1120px]">
+      <div className="relative z-10 flex flex-col justify-end min-h-[580px] sm:min-h-[680px] md:min-h-[820px] lg:min-h-[960px] xl:min-h-[1080px] 2xl:min-h-[1180px]">
         <motion.div
-          className="px-5 sm:px-8 md:px-14 lg:px-18 xl:px-24 pb-8 sm:pb-10 md:pb-14 lg:pb-18 xl:pb-22 pt-6 md:pt-10"
+          className="px-5 sm:px-8 md:px-14 lg:px-18 xl:px-24 pb-4 sm:pb-6 md:pb-8 lg:pb-10 xl:pb-12 pt-6 md:pt-10"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
@@ -193,7 +193,7 @@ export default function Footer() {
             <motion.div variants={containerVariants} className="flex flex-col">
               <SectionLabel>Navigate</SectionLabel>
               <ul className="flex flex-col gap-2.5 sm:gap-3">
-                {['About', 'Services', 'Works', 'Contact'].map((item, i) => (
+                {['About', 'Services', 'Works', 'Testimonials', 'Contact'].map((item, i) => (
                   <motion.li key={item} variants={fadeUp} custom={i}>
                     <NavLink href={`#${item.toLowerCase()}`}>{item}</NavLink>
                   </motion.li>
