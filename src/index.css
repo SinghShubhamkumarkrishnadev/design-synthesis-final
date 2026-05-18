@@ -1,0 +1,8 @@
+/* src/index.css */
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
