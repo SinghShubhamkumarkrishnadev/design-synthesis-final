@@ -1,8 +1,10 @@
+"use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Send, ChevronRight, ChevronLeft, Phone, Mail } from "lucide-react";
+import FloatingPaths from "./FloatingPaths"; // Integrated background path animation
 
 // Assets 
 import contactAnimation from "../../assets/blue phone.json"; 
@@ -28,9 +30,97 @@ const containerStagger = {
     },
   },
 };
+
 const greenPhoneFilter =
   "grayscale(1) sepia(1) hue-rotate(100deg) saturate(0.9) brightness(0.8)";
 
+/* ==========================================================================
+   REUSABLE LIQUID GLASS BUTTON COMPONENT (UPDATED WITH PROGRESSIVE FILL)
+   ========================================================================== */
+function LiquidGlassButton({ children, className = "", isSubmitting, fillDuration = 2, ...props }) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Motion variants for the liquid filling effect
+  const liquidVariants = {
+    empty: {
+      x: "-105%",
+      transition: { 
+        duration: 0.6, 
+        ease: [0.16, 1, 0.3, 1] // Snappy fallback when mouse leaves
+      }
+    },
+    filled: {
+      x: "0%",
+      transition: { 
+        duration: fillDuration, // Controlled slow filling speed
+        ease: "linear" // Linear ensures a constant, steady fluid rise
+      }
+    }
+  };
+
+  return (
+    <div className="relative inline-block w-full sm:w-auto">
+      <motion.button
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        whileTap={{ scale: 0.98 }}
+        disabled={isSubmitting}
+        className={`
+          group relative overflow-hidden inline-flex items-center justify-center gap-3
+          w-full sm:w-auto px-10 py-4.5 rounded-xl text-xs font-bold uppercase tracking-widest
+          text-[#2c4a3b] transition-colors duration-300 hover:text-white border border-zinc-400/30
+          cursor-pointer select-none backdrop-blur-xs shadow-md shadow-zinc-900/5
+          ${className}
+        `}
+        {...props}
+      >
+        {/* Liquid wave fill layer - responds instantly to hover state matching mid-animation frames */}
+        <motion.div
+          className="absolute inset-0 z-0 bg-[#2c4a3b]"
+          variants={liquidVariants}
+          animate={isHovered ? "filled" : "empty"}
+          initial="empty"
+          style={{
+            // Mask creating subtle wave/distortion effect as it drags from the left
+            clipPath: "polygon(0% 0%, 100% 0%, 97% 50%, 100% 100%, 0% 100%)",
+          }}
+        />
+
+        {/* Dynamic 3D Inner Glass Shadow Border */}
+        <div className="absolute inset-0 z-10 pointer-events-none rounded-xl transition-opacity duration-300 group-hover:opacity-40
+          shadow-[0_0_6px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3px_rgba(0,0,0,0.4),inset_-3px_-3px_0.5px_-3px_rgba(0,0,0,0.35),inset_1px_1px_1px_-0.5px_rgba(0,0,0,0.2),inset_-1px_-1px_1px_-0.5px_rgba(0,0,0,0.2),inset_0_0_6px_6px_rgba(0,0,0,0.05)]" 
+        />
+
+        {/* SVG Distorted Glass Overlay */}
+        <div
+          className="absolute inset-0 z-10 opacity-70 pointer-events-none rounded-xl"
+          style={{ backdropFilter: 'url("#button-glass-filter")' }}
+        />
+
+        {/* Foreground Content */}
+        <span className="relative z-20 flex items-center justify-center gap-3">
+          {children}
+        </span>
+      </motion.button>
+
+      {/* SVG Turbulence definitions injected under the container safely */}
+      <svg className="absolute w-0 h-0 hidden" aria-hidden="true">
+        <defs>
+          <filter id="button-glass-filter" colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04 0.04" numOctaves="1" result="noise" />
+            <feGaussianBlur in="noise" stdDeviation="1.5" result="blurredNoise" />
+            <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="30" xChannelSelector="R" yChannelSelector="B" result="displaced" />
+            <feGaussianBlur in="displaced" stdDeviation="0.5" result="final" />
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   MAIN CONTACT SECTION COMPONENT
+   ========================================================================== */
 export default function ContactSection() {
   const [activeTab, setActiveTab] = useState("phone");
   const [formData, setFormData] = useState({
@@ -96,8 +186,26 @@ export default function ContactSection() {
         }}
       />
 
+      {/* Radial glow background layer */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background: `radial-gradient(ellipse 72% 48% at 50% 50%, #eef4f1 0%, transparent 72%)`,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Floating lines background animation - right-to-left direction */}
+      <div
+        className="absolute inset-0 z-0 opacity-40 pointer-events-none"
+        aria-hidden="true"
+      >
+        <FloatingPaths position={1}  />
+        <FloatingPaths position={-1} />
+      </div>
+
       <motion.div 
-        className="max-w-7xl w-full mx-auto min-h-[80vh] flex flex-col justify-between lg:justify-center gap-12"
+        className="max-w-7xl w-full mx-auto min-h-[80vh] flex flex-col justify-between lg:justify-center gap-12 relative z-10"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-120px" }}
@@ -114,16 +222,13 @@ export default function ContactSection() {
             }`}
             variants={fadeInReveal}
           >
-            {/* Phone animation wrapper — filter shifts blue → dark green */}
             <div className="relative w-full max-w-[340px] sm:max-w-[420px] mx-auto mb-8 flex items-center justify-center">
-              {/* Background graphic — tinted to match green theme */}
               <img 
                 src={phoneBg} 
                 alt="Phone background graphic" 
                 className="absolute inset-0 w-full h-full object-contain -z-0 opacity-100 pointer-events-none"
                 style={{ filter: greenPhoneFilter }}
               />
-              {/* Lottie phone animation — CSS filter applied to recolor blue → dark green */}
               <div
                 className="relative z-10 w-full h-full scale-105"
                 style={{ filter: greenPhoneFilter }}
@@ -145,15 +250,10 @@ export default function ContactSection() {
                 Our core consulting team is ready to step in. Skip the waiting lines and reach out directly for priority project setup or design syntheses.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-                <motion.a
-                  whileHover={{ scale: 1.03, backgroundColor: "#1c2e24" }}
-                  whileTap={{ scale: 0.98 }}
-                  href="tel:+919924774664"
-                  className="w-full sm:w-auto bg-[#2c4a3b] text-white px-10 py-4.5 rounded-xl font-bold tracking-widest transition-colors shadow-lg shadow-zinc-900/10 uppercase text-xs text-center"
-                >
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 w-full">
+                <LiquidGlassButton fillDuration={1.8} onClick={() => window.open("tel:+919924774664")}>
                   Call Now
-                </motion.a>
+                </LiquidGlassButton>
               </div>
             </div>
           </motion.div>
@@ -238,16 +338,12 @@ export default function ContactSection() {
                       ></textarea>
                     </div>
 
-                    <motion.button
-                      whileHover={{ scale: 1.01, backgroundColor: "#1c2e24" }}
-                      whileTap={{ scale: 0.99 }}
-                      disabled={isSubmitting}
-                      type="submit"
-                      className="w-full mt-6 bg-[#2c4a3b] text-white py-4.5 rounded-xl font-bold tracking-widest flex items-center justify-center gap-3 transition-colors shadow-md shadow-zinc-900/10 cursor-pointer text-xs uppercase"
-                    >
-                      {isSubmitting ? "SENDING..." : "SUBMIT MESSAGE"}
-                      <Send size={14} />
-                    </motion.button>
+                    <div className="w-full pt-2">
+                      <LiquidGlassButton type="submit" isSubmitting={isSubmitting} className="w-full">
+                        {isSubmitting ? "SENDING..." : "SUBMIT MESSAGE"}
+                        <Send size={14} />
+                      </LiquidGlassButton>
+                    </div>
                   </form>
                 </motion.div>
               ) : (
