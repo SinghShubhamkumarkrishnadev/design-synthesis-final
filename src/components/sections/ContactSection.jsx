@@ -6,9 +6,9 @@ import toast, { Toaster } from "react-hot-toast";
 import { Send, ChevronRight, ChevronLeft, Phone, Mail } from "lucide-react";
 import FloatingPaths from "./FloatingPaths"; // Integrated background path animation
 
-// Assets 
-import contactAnimation from "../../assets/blue phone.json"; 
-import successAnimation from "../../assets/sendmail.json"; 
+// Assets
+import contactAnimation from "../../assets/blue phone.json";
+import successAnimation from "../../assets/sendmail.json";
 import phoneBg from "../../assets/phonebg.png";
 
 // Premium Scroll-Reveal Motion Configurations
@@ -17,7 +17,7 @@ const fadeInReveal = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] }, 
+    transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
   },
 };
 
@@ -37,25 +37,31 @@ const greenPhoneFilter =
 /* ==========================================================================
    REUSABLE LIQUID GLASS BUTTON COMPONENT (UPDATED WITH PROGRESSIVE FILL)
    ========================================================================== */
-function LiquidGlassButton({ children, className = "", isSubmitting, fillDuration = 2, ...props }) {
+function LiquidGlassButton({
+  children,
+  className = "",
+  isSubmitting,
+  fillDuration = 2,
+  ...props
+}) {
   const [isHovered, setIsHovered] = useState(false);
 
   // Motion variants for the liquid filling effect
   const liquidVariants = {
     empty: {
       x: "-105%",
-      transition: { 
-        duration: 0.6, 
-        ease: [0.16, 1, 0.3, 1] // Snappy fallback when mouse leaves
-      }
+      transition: {
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1], // Snappy fallback when mouse leaves
+      },
     },
     filled: {
       x: "0%",
-      transition: { 
+      transition: {
         duration: fillDuration, // Controlled slow filling speed
-        ease: "linear" // Linear ensures a constant, steady fluid rise
-      }
-    }
+        ease: "linear", // Linear ensures a constant, steady fluid rise
+      },
+    },
   };
 
   return (
@@ -87,8 +93,9 @@ function LiquidGlassButton({ children, className = "", isSubmitting, fillDuratio
         />
 
         {/* Dynamic 3D Inner Glass Shadow Border */}
-        <div className="absolute inset-0 z-10 pointer-events-none rounded-xl transition-opacity duration-300 group-hover:opacity-40
-          shadow-[0_0_6px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3px_rgba(0,0,0,0.4),inset_-3px_-3px_0.5px_-3px_rgba(0,0,0,0.35),inset_1px_1px_1px_-0.5px_rgba(0,0,0,0.2),inset_-1px_-1px_1px_-0.5px_rgba(0,0,0,0.2),inset_0_0_6px_6px_rgba(0,0,0,0.05)]" 
+        <div
+          className="absolute inset-0 z-10 pointer-events-none rounded-xl transition-opacity duration-300 group-hover:opacity-40
+          shadow-[0_0_6px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3px_rgba(0,0,0,0.4),inset_-3px_-3px_0.5px_-3px_rgba(0,0,0,0.35),inset_1px_1px_1px_-0.5px_rgba(0,0,0,0.2),inset_-1px_-1px_1px_-0.5px_rgba(0,0,0,0.2),inset_0_0_6px_6px_rgba(0,0,0,0.05)]"
         />
 
         {/* SVG Distorted Glass Overlay */}
@@ -107,9 +114,25 @@ function LiquidGlassButton({ children, className = "", isSubmitting, fillDuratio
       <svg className="absolute w-0 h-0 hidden" aria-hidden="true">
         <defs>
           <filter id="button-glass-filter" colorInterpolationFilters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="0.04 0.04" numOctaves="1" result="noise" />
-            <feGaussianBlur in="noise" stdDeviation="1.5" result="blurredNoise" />
-            <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="30" xChannelSelector="R" yChannelSelector="B" result="displaced" />
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.04 0.04"
+              numOctaves="1"
+              result="noise"
+            />
+            <feGaussianBlur
+              in="noise"
+              stdDeviation="1.5"
+              result="blurredNoise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="blurredNoise"
+              scale="30"
+              xChannelSelector="R"
+              yChannelSelector="B"
+              result="displaced"
+            />
             <feGaussianBlur in="displaced" stdDeviation="0.5" result="final" />
           </filter>
         </defs>
@@ -176,13 +199,13 @@ export default function ContactSection() {
       id="contact"
       className="relative min-h-screen w-full overflow-x-hidden bg-[#eff2f0] font-sans flex items-center justify-center py-20 px-4 sm:px-8 lg:px-16"
     >
-      <Toaster 
-        position="bottom-right" 
+      <Toaster
+        position="bottom-right"
         toastOptions={{
           style: {
             background: "#1c2e24",
             color: "#ffffff",
-          }
+          },
         }}
       />
 
@@ -200,11 +223,11 @@ export default function ContactSection() {
         className="absolute inset-0 z-0 opacity-40 pointer-events-none"
         aria-hidden="true"
       >
-        <FloatingPaths position={1}  />
+        <FloatingPaths position={1} />
         <FloatingPaths position={-1} />
       </div>
 
-      <motion.div 
+      <motion.div
         className="max-w-7xl w-full mx-auto min-h-[80vh] flex flex-col justify-between lg:justify-center gap-12 relative z-10"
         initial="hidden"
         whileInView="visible"
@@ -212,7 +235,6 @@ export default function ContactSection() {
         variants={containerStagger}
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-full min-h-[75vh] gap-16 lg:gap-24 items-center">
-          
           {/* ========================================================= */}
           {/* LEFT SIDE: PHONE / CALL US SECTION                        */}
           {/* ========================================================= */}
@@ -222,13 +244,31 @@ export default function ContactSection() {
             }`}
             variants={fadeInReveal}
           >
+            {/* ================= MOBILE HEADING FIRST ================= */}
+            <div className="space-y-6 max-w-xl mx-auto lg:mx-0 text-center lg:text-left relative z-20 lg:hidden mb-8">
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#dee5e1] rounded-full text-xs font-semibold uppercase tracking-widest text-[#1c2e24] border border-zinc-300/60">
+                  <Phone size={12} className="text-[#2c4a3b]" /> Direct Hotline
+                </div>
+
+                <h2 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-black text-[#1b1b1b] tracking-tight leading-none">
+                  Contact{" "}
+                  <span className="text-[#2c4a3b] font-serif italic font-normal">
+                    us
+                  </span>
+                </h2>
+              </div>
+            </div>
+
+            {/* ================= PHONE ANIMATION ================= */}
             <div className="relative w-full max-w-[340px] sm:max-w-[420px] mx-auto mb-8 flex items-center justify-center">
-              <img 
-                src={phoneBg} 
-                alt="Phone background graphic" 
+              <img
+                src={phoneBg}
+                alt="Phone background graphic"
                 className="absolute inset-0 w-full h-full object-contain -z-0 opacity-100 pointer-events-none"
                 style={{ filter: greenPhoneFilter }}
               />
+
               <div
                 className="relative z-10 w-full h-full scale-105"
                 style={{ filter: greenPhoneFilter }}
@@ -237,21 +277,48 @@ export default function ContactSection() {
               </div>
             </div>
 
-            <div className="space-y-6 max-w-xl mx-auto lg:mx-0 text-center lg:text-left">
+            {/* ================= DESKTOP HEADING ================= */}
+            <div className="space-y-6 max-w-xl mx-auto lg:mx-0 text-center lg:text-left hidden lg:block">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#dee5e1] rounded-full text-xs font-semibold uppercase tracking-widest text-[#1c2e24] border border-zinc-300/60">
                 <Phone size={12} className="text-[#2c4a3b]" /> Direct Hotline
               </div>
-              
+
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#1b1b1b] tracking-tight leading-none">
-                Contact <span className="text-[#2c4a3b] font-serif italic font-normal">us</span>
+                Contact{" "}
+                <span className="text-[#2c4a3b] font-serif italic font-normal">
+                  us
+                </span>
               </h2>
-              
+
               <p className="text-zinc-600 text-base sm:text-lg leading-relaxed font-medium max-w-md mx-auto lg:mx-0">
-                Our core consulting team is ready to step in. Skip the waiting lines and reach out directly for priority project setup or design syntheses.
+                Our core consulting team is ready to step in. Skip the waiting
+                lines and reach out directly for priority project setup or
+                design syntheses.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 w-full">
-                <LiquidGlassButton fillDuration={1.8} onClick={() => window.open("tel:+919924774664")}>
+                <LiquidGlassButton
+                  fillDuration={1.8}
+                  onClick={() => window.open("tel:+919924774664")}
+                >
+                  Call Now
+                </LiquidGlassButton>
+              </div>
+            </div>
+
+            {/* ================= MOBILE CONTENT BELOW ANIMATION ================= */}
+            <div className="space-y-6 max-w-xl mx-auto lg:mx-0 text-center lg:text-left lg:hidden">
+              <p className="text-zinc-600 text-base sm:text-lg leading-relaxed font-medium max-w-md mx-auto lg:mx-0">
+                Our core consulting team is ready to step in. Skip the waiting
+                lines and reach out directly for priority project setup or
+                design syntheses.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 w-full">
+                <LiquidGlassButton
+                  fillDuration={1.8}
+                  onClick={() => window.open("tel:+919924774664")}
+                >
                   Call Now
                 </LiquidGlassButton>
               </div>
@@ -279,13 +346,18 @@ export default function ContactSection() {
                 >
                   <div className="text-center lg:text-left mb-10 space-y-4">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#dee5e1] rounded-full text-xs font-semibold uppercase tracking-widest text-[#1c2e24] border border-zinc-300/60">
-                      <Mail size={12} className="text-[#2c4a3b]" /> Instant Inquiry
+                      <Mail size={12} className="text-[#2c4a3b]" /> Instant
+                      Inquiry
                     </div>
                     <h3 className="text-4xl sm:text-5xl font-black text-[#1b1b1b] tracking-tight leading-none">
-                      Send a <span className="text-[#2c4a3b] font-serif italic font-normal">Message</span>
+                      Send a{" "}
+                      <span className="text-[#2c4a3b] font-serif italic font-normal">
+                        Message
+                      </span>
                     </h3>
                     <p className="text-zinc-500 text-base font-medium max-w-md mx-auto lg:mx-0">
-                      Drop your details below and a representative will follow up with a customized design setup.
+                      Drop your details below and a representative will follow
+                      up with a customized design setup.
                     </p>
                   </div>
 
@@ -313,7 +385,7 @@ export default function ContactSection() {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="relative group">
                       <input
                         type="email"
@@ -339,7 +411,11 @@ export default function ContactSection() {
                     </div>
 
                     <div className="w-full pt-2">
-                      <LiquidGlassButton type="submit" isSubmitting={isSubmitting} className="w-full">
+                      <LiquidGlassButton
+                        type="submit"
+                        isSubmitting={isSubmitting}
+                        className="w-full"
+                      >
                         {isSubmitting ? "SENDING..." : "SUBMIT MESSAGE"}
                         <Send size={14} />
                       </LiquidGlassButton>
@@ -362,7 +438,8 @@ export default function ContactSection() {
                       Thank You!
                     </h3>
                     <p className="text-zinc-600 text-base font-medium max-w-sm leading-relaxed">
-                      Your message has reached our inbox successfully. Expect a follow-up outline from us within one business day.
+                      Your message has reached our inbox successfully. Expect a
+                      follow-up outline from us within one business day.
                     </p>
                   </div>
                   <button
@@ -386,10 +463,14 @@ export default function ContactSection() {
           >
             <ChevronLeft size={18} />
           </button>
-          
+
           <div className="flex gap-2">
-            <span className={`h-2 rounded-full transition-all duration-300 ${activeTab === "phone" ? "bg-[#2c4a3b] w-5" : "bg-zinc-300 w-2"}`} />
-            <span className={`h-2 rounded-full transition-all duration-300 ${activeTab === "email" ? "bg-[#2c4a3b] w-5" : "bg-zinc-300 w-2"}`} />
+            <span
+              className={`h-2 rounded-full transition-all duration-300 ${activeTab === "phone" ? "bg-[#2c4a3b] w-5" : "bg-zinc-300 w-2"}`}
+            />
+            <span
+              className={`h-2 rounded-full transition-all duration-300 ${activeTab === "email" ? "bg-[#2c4a3b] w-5" : "bg-zinc-300 w-2"}`}
+            />
           </div>
 
           <button
