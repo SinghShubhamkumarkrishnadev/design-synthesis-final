@@ -1,28 +1,46 @@
-import { useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useRef, useCallback, useEffect, useState } from "react";
 import AmbientLighting from "./AmbientLighting";
 import DustParticles from "./DustParticles";
 import Shelf from "./Shelf";
 import { getProjectsByShelf, SHELF_COUNT } from "../../data/projects";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BookshelfScene
-// The complete bookshelf environment.
-// Desktop/Tablet: cinematic 3D perspective, ambient lighting, dust.
-// Mobile: simplified atmospheric lighting, no dust particles (perf).
+// BookshelfScene — Redesigned
+//
+// · Pure CSS light background — no image dependency
+// · Lighter walnut cabinet tones for the light theme
+// · Compact shelf height
+// · Left-anchored on desktop, centered on tablet/mobile
+// · Subtle perspective tilt on desktop only
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SHELF_GLOW_POSITIONS = ["38%", "74%"];
+const SHELF_GLOW_POSITIONS = ["33%", "67%", "100%"];
 
-function getIsMobile() {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(max-width: 640px)").matches;
+function useBreakpoint() {
+  const [bp, setBp] = useState(() => {
+    if (typeof window === "undefined") return "desktop";
+    if (window.innerWidth <= 640) return "mobile";
+    if (window.innerWidth <= 900) return "tablet";
+    return "desktop";
+  });
+
+  useEffect(() => {
+    const update = () => {
+      if (window.innerWidth <= 640) setBp("mobile");
+      else if (window.innerWidth <= 900) setBp("tablet");
+      else setBp("desktop");
+    };
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return bp;
 }
 
-function BookshelfScene({ onBookSelect }) {
-  const sceneRef = useRef(null);
-
-  const isMobile = getIsMobile();
+// ─────────────────────────────────────────────────────────────────────────────
+export default function BookshelfScene({ onBookSelect }) {
+  const bp = useBreakpoint();
+  const isMobile = bp === "mobile";
 
   const shelves = Array.from({ length: SHELF_COUNT }, (_, i) => ({
     index: i,
@@ -30,122 +48,109 @@ function BookshelfScene({ onBookSelect }) {
   }));
 
   const handleBookClick = useCallback(
-    (project) => {
-      onBookSelect?.(project);
-    },
+    (project) => onBookSelect?.(project),
     [onBookSelect]
   );
 
   return (
-    <div className="bookshelf-scene" ref={sceneRef}>
-      {/* ── Atmospheric Layers ─────────────────────────────────────────── */}
-      <AmbientLighting
-        shelfCount={SHELF_COUNT}
-        shelfPositions={SHELF_GLOW_POSITIONS}
-      />
+    <div className="works-scene" role="region" aria-label="Project Archive">
 
-      {/* Dust motes — skip on mobile for performance */}
-      {!isMobile && <DustParticles count={20} />}
+      {/* ── Bookshelf Cabinet ──────────────────────────────────────── */}
+      <div
+        className="bookshelf-cabinet"
+        role="region"
+        aria-label="Project Archive Bookshelf"
+      >
+        {/* Crown molding */}
+        <div className="cabinet__crown" aria-hidden="true" />
 
-      {/* ── Scene Frame ────────────────────────────────────────────────── */}
-      <div className="bookshelf-scene__inner">
+        {/* Cabinet body */}
+        <div className="cabinet__body">
+          <div className="cabinet__panel cabinet__panel--left" aria-hidden="true" />
 
-        {/* Top frame ornament */}
-        <SceneTopFrame isMobile={isMobile} />
+          {/* Recessed inner cavity */}
+          <div className="cabinet__inner">
+            <AmbientLighting
+              shelfCount={SHELF_COUNT}
+              shelfPositions={SHELF_GLOW_POSITIONS}
+            />
+            {!isMobile && <DustParticles count={10} />}
 
-        {/* ── Shelf Rows ─────────────────────────────────────────────── */}
-        {shelves.map(({ index, projects }) => (
-          <Shelf
-            key={index}
-            shelfIndex={index}
-            projects={projects}
-            onBookClick={handleBookClick}
-          />
-        ))}
+            <div className="bookshelf-scene">
+              <div className="bookshelf-scene__inner">
+                <SceneTopFrame isMobile={isMobile} />
 
-        {/* Bottom rail */}
-        <SceneBottomRail isMobile={isMobile} />
+                {shelves.map(({ index, projects }) => (
+                  <Shelf
+                    key={index}
+                    shelfIndex={index}
+                    projects={projects}
+                    onBookClick={handleBookClick}
+                  />
+                ))}
+
+                <SceneBottomRail />
+              </div>
+            </div>
+          </div>
+
+          <div className="cabinet__panel cabinet__panel--right" aria-hidden="true" />
+        </div>
+
+        {/* Base plinth */}
+        <div className="cabinet__base" aria-hidden="true" />
+
+        {/* SVG grain filter */}
+        <SvgFilterDefs />
       </div>
     </div>
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
-
 function SceneTopFrame({ isMobile }) {
   return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "relative",
-        width: "100%",
-        height: isMobile ? "16px" : "24px",
-        marginBottom: "0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: isMobile ? "10px" : "16px",
-        flexShrink: 0,
-        padding: isMobile ? "0 1.5rem" : "0",
-      }}
-    >
-      <div
-        style={{
-          flex: 1,
-          height: "1px",
-          background:
-            "linear-gradient(to right, transparent, rgba(160,120,60,0.2), rgba(160,120,60,0.35), rgba(160,120,60,0.2), transparent)",
-        }}
-      />
-      <div
-        style={{
-          width: isMobile ? "4px" : "5px",
-          height: isMobile ? "4px" : "5px",
-          border: "1px solid rgba(160,120,60,0.35)",
-          transform: "rotate(45deg)",
-          flexShrink: 0,
-        }}
-      />
-      <div
-        style={{
-          flex: 1,
-          height: "1px",
-          background:
-            "linear-gradient(to left, transparent, rgba(160,120,60,0.2), rgba(160,120,60,0.35), rgba(160,120,60,0.2), transparent)",
-        }}
-      />
+    <div className="scene-top-frame" aria-hidden="true">
+      <div className="frame-line" />
+      {!isMobile && <div className="frame-gem" />}
+      <div className="frame-line" />
     </div>
   );
 }
 
-function SceneBottomRail({ isMobile }) {
+function SceneBottomRail() {
+  return <div className="scene-bottom-rail" aria-hidden="true" />;
+}
+
+function SvgFilterDefs() {
   return (
-    <div
+    <svg
+      width="0"
+      height="0"
+      style={{ position: "absolute", overflow: "hidden" }}
       aria-hidden="true"
-      style={{
-        position: "relative",
-        width: "100%",
-        height: isMobile ? "16px" : "28px",
-        marginTop: isMobile ? "2px" : "4px",
-        background: "linear-gradient(to bottom, #1E1208 0%, #140E06 60%, #0C0804 100%)",
-        borderTop: "1px solid rgba(80, 50, 20, 0.5)",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 20px rgba(0,0,0,0.6)",
-      }}
     >
-      <div
-        style={{
-          position: "absolute",
-          top: isMobile ? "5px" : "8px",
-          left: "8%",
-          right: "8%",
-          height: "1px",
-          background:
-            "linear-gradient(to right, transparent, rgba(180,140,60,0.2), rgba(180,140,60,0.35), rgba(180,140,60,0.2), transparent)",
-        }}
-      />
-    </div>
+      <defs>
+        <filter
+          id="ds-grain"
+          x="0%" y="0%" width="100%" height="100%"
+          colorInterpolationFilters="linearRGB"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.68"
+            numOctaves="4"
+            seed="12"
+            stitchTiles="stitch"
+            result="noise"
+          />
+          <feColorMatrix in="noise" type="saturate" values="0" result="grayNoise" />
+          <feComposite in="SourceGraphic" in2="grayNoise" operator="in" result="masked" />
+          <feBlend in="SourceGraphic" in2="masked" mode="luminosity" result="blended" />
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="1" />
+          </feComponentTransfer>
+        </filter>
+      </defs>
+    </svg>
   );
 }
-
-export default BookshelfScene;

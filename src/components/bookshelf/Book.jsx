@@ -1,111 +1,101 @@
-import { useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Book
-// A single physical book rendered as a realistic 3D-ish spine.
-// Desktop/Tablet: hover lift with Framer Motion.
-// Mobile: reduced transforms, touch-friendly sizing, no hover label.
+// Book — Redesigned
+//
+// Key fixes:
+// · Hover label now shows as a white elevated card with clear text
+// · Mobile: tap activates isActive state (no broken hover)
+// · Proper touch cancel/end cleanup
+// · Breakpoint hook is now reactive (matchMedia listener)
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Breakpoint detection hook ─────────────────────────────────────────────────
-function useIsMobile() {
-  // SSR-safe: check at render time
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(max-width: 640px)").matches;
+const ease = [0.25, 0.1, 0.25, 1];
+
+// Reactive breakpoint hook
+function useBreakpoint() {
+  const getState = () => {
+    if (typeof window === "undefined") return { isMobile: false, isTablet: false };
+    return {
+      isMobile: window.matchMedia("(max-width: 640px)").matches,
+      isTablet: window.matchMedia("(min-width: 641px) and (max-width: 900px)").matches,
+    };
+  };
+
+  const [state, setState] = useState(getState);
+
+  useEffect(() => {
+    const mqlMobile = window.matchMedia("(max-width: 640px)");
+    const mqlTablet = window.matchMedia("(min-width: 641px) and (max-width: 900px)");
+    const update = () => setState(getState());
+    mqlMobile.addEventListener("change", update);
+    mqlTablet.addEventListener("change", update);
+    return () => {
+      mqlMobile.removeEventListener("change", update);
+      mqlTablet.removeEventListener("change", update);
+    };
+  }, []);
+
+  return state;
 }
 
-function useIsTablet() {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(min-width: 641px) and (max-width: 900px)").matches;
-}
-
-// ── Framer Motion variants — desktop (full cinematic) ─────────────────────────
-const bookVariantsDesktop = {
-  rest: {
-    y: 0,
-    transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] },
+// ── Motion config ─────────────────────────────────────────────────────────────
+const liftVariants = {
+  desktop: {
+    rest:  { y: 0,   transition: { duration: 0.55, ease } },
+    hover: { y: -16, transition: { duration: 0.40, ease } },
   },
-  hover: {
-    y: -13,
-    transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] },
+  tablet: {
+    rest:  { y: 0,  transition: { duration: 0.45, ease } },
+    hover: { y: -10, transition: { duration: 0.35, ease } },
   },
-};
-
-// ── Framer Motion variants — tablet (subtler lift) ────────────────────────────
-const bookVariantsTablet = {
-  rest: {
-    y: 0,
-    transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] },
+  mobile: {
+    rest:  { y: 0,  transition: { duration: 0.3, ease } },
+    hover: { y: -6, transition: { duration: 0.25, ease } },
   },
-  hover: {
-    y: -8,
-    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-  },
-};
-
-// ── Framer Motion variants — mobile (no lift, minimal motion) ─────────────────
-const bookVariantsMobile = {
-  rest: { y: 0 },
-  hover: { y: 0 },
 };
 
 const shadowVariants = {
-  rest: {
-    scaleX: 1,
-    y: 0,
-    opacity: 0.38,
-    transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] },
+  desktop: {
+    rest:  { scaleX: 1,    opacity: 0.22, y: 0, transition: { duration: 0.55, ease } },
+    hover: { scaleX: 1.35, opacity: 0.40, y: 4, transition: { duration: 0.40, ease } },
   },
-  hover: {
-    scaleX: 1.3,
-    y: 3,
-    opacity: 0.6,
-    transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] },
+  tablet: {
+    rest:  { scaleX: 1,    opacity: 0.18, y: 0, transition: { duration: 0.45, ease } },
+    hover: { scaleX: 1.20, opacity: 0.34, y: 2, transition: { duration: 0.35, ease } },
   },
-};
-
-const shadowVariantsMobile = {
-  rest: { scaleX: 1, y: 0, opacity: 0.25 },
-  hover: { scaleX: 1, y: 0, opacity: 0.25 },
-};
-
-const labelVariants = {
-  rest: { opacity: 0, y: 4, transition: { duration: 0.25 } },
-  hover: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] },
+  mobile: {
+    rest:  { scaleX: 1,    opacity: 0.16, y: 0, transition: { duration: 0.3, ease } },
+    hover: { scaleX: 1.15, opacity: 0.30, y: 2, transition: { duration: 0.25, ease } },
   },
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
-function Book({ project, onClick }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const bookRef = useRef(null);
-
-  const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
+export default function Book({ project, onClick }) {
+  const [isActive, setIsActive] = useState(false);
+  const { isMobile, isTablet } = useBreakpoint();
+  const tier = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
 
   const {
-    title,
-    subtitle,
-    category,
-    year,
-    location,
-    spineColor,
-    spineGradient,
-    textColor,
-    accentColor,
-    pageColor,
-    height,
-    thickness,
+    title, category, year,
+    spineColor, spineGradient, textColor, accentColor, pageColor,
+    height, thickness,
   } = project;
 
-  // Scale factors for responsive sizing
-  const tabletScale = 0.82;
-  const mobileHeightScale = 1; // height/width set via CSS vars in SCSS for mobile
+  // Responsive dimensions
+  const scaledHeight = isTablet
+    ? Math.round(height * 0.82)
+    : isMobile
+    ? Math.min(height, 155)
+    : height;
+
+  const scaledWidth = isTablet
+    ? Math.round(thickness * 0.82)
+    : isMobile
+    ? Math.max(Math.round(thickness * 0.78), 26)
+    : thickness;
 
   const cssVars = {
     "--book-color":    spineColor,
@@ -113,94 +103,79 @@ function Book({ project, onClick }) {
     "--book-text":     textColor,
     "--book-accent":   accentColor,
     "--book-page":     pageColor,
-    // On tablet: scale book dimensions in JS to ensure proper sizing
-    "--book-h": isTablet
-      ? `${Math.round(height * tabletScale)}px`
-      : isMobile
-      ? `${Math.min(height, 170)}px`
-      : `${height}px`,
-    "--book-w": isTablet
-      ? `${Math.round(thickness * tabletScale)}px`
-      : isMobile
-      ? `${Math.max(Math.round(thickness * 0.78), 30)}px`
-      : `${thickness}px`,
+    "--book-h":        `${scaledHeight}px`,
+    "--book-w":        `${scaledWidth}px`,
   };
 
-  // Select appropriate variants
-  const bookVariants = isMobile
-    ? bookVariantsMobile
-    : isTablet
-    ? bookVariantsTablet
-    : bookVariantsDesktop;
-
-  const activeShadowVariants = isMobile ? shadowVariantsMobile : shadowVariants;
-
-  // On mobile: no hover interaction — tap is king
-  const interactionProps = isMobile
-    ? {
-        onTouchStart: () => setIsHovered(true),
-        onTouchEnd: () => setIsHovered(false),
-      }
+  // Desktop/tablet: use framer-motion hover events
+  // Mobile: use touch events to toggle isActive
+  const motionProps = isMobile
+    ? {}
     : {
-        onHoverStart: () => setIsHovered(true),
-        onHoverEnd: () => setIsHovered(false),
+        onHoverStart: () => setIsActive(true),
+        onHoverEnd:   () => setIsActive(false),
       };
+
+  const touchProps = isMobile
+    ? {
+        onTouchStart:  () => setIsActive(true),
+        onTouchEnd:    () => setTimeout(() => setIsActive(false), 600),
+        onTouchCancel: () => setIsActive(false),
+      }
+    : {};
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick?.(project);
+    }
+  };
 
   return (
     <motion.div
-      ref={bookRef}
-      className={clsx(
-        "book",
-        isHovered && "book--hovered",
-        isMobile && "book--mobile",
-        isTablet && "book--tablet"
-      )}
+      className={clsx("book", isMobile && "book--mobile", isTablet && "book--tablet")}
       style={cssVars}
       initial="rest"
-      animate={isHovered ? "hover" : "rest"}
-      {...interactionProps}
+      animate={isActive ? "hover" : "rest"}
       onClick={() => onClick?.(project)}
       role="button"
       tabIndex={0}
       aria-label={`${title} — ${category}, ${year}`}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onClick?.(project);
-      }}
+      onKeyDown={handleKeyDown}
+      {...motionProps}
+      {...touchProps}
     >
-      {/* ── Hover Label (desktop/tablet only) ────────────────────────── */}
-      {!isMobile && (
-        <motion.div
-          className="book__label"
-          variants={labelVariants}
-          aria-hidden="true"
-        >
-          <span className="book__label-title">{title}</span>
-          <span className="book__label-meta">
-            {category} · {location}
-          </span>
-        </motion.div>
-      )}
+      {/* ── Hover/active label card — white elevated card ─────────── */}
+      <motion.div
+        className="book__label"
+        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+        animate={
+          isActive
+            ? { opacity: 1, y: 0, scale: 1, transition: { duration: 0.22, ease } }
+            : { opacity: 0, y: 8, scale: 0.96, transition: { duration: 0.18 } }
+        }
+        aria-hidden="true"
+      >
+        <span className="book__label-title">{title}</span>
+        <span className="book__label-divider" />
+        <span className="book__label-meta">{category} · {year}</span>
+      </motion.div>
 
-      {/* ── Book Wrapper ───────────────────────────────────────────────── */}
-      <motion.div className="book__wrapper" variants={bookVariants}>
+      {/* ── Lift animation wrapper ───────────────────────────────── */}
+      <motion.div className="book__wrapper" variants={liftVariants[tier]}>
+        {/* Top surface — desktop/tablet 3-D illusion */}
+        {!isMobile && <div className="book__top" aria-hidden="true" />}
 
-        {/* Top surface — only on desktop/tablet */}
-        {!isMobile && (
-          <div className="book__top" aria-hidden="true" />
-        )}
-
-        {/* Main Spine */}
+        {/* Main spine */}
         <div className="book__spine" aria-hidden="true">
-
           <div className="book__binding book__binding--top" />
           <div className="book__binding book__binding--bottom" />
-
           <div className="book__grain" />
 
           <div className="book__content">
             <div className="book__text-track">
               <span className="book__title-text">{title}</span>
-              <span className="book__divider" aria-hidden="true" />
+              <span className="book__divider" />
               <span className="book__year-text">{year}</span>
             </div>
           </div>
@@ -214,14 +189,12 @@ function Book({ project, onClick }) {
         <div className="book__pages" aria-hidden="true" />
       </motion.div>
 
-      {/* ── Floor shadow ───────────────────────────────────────────────── */}
+      {/* Floor shadow */}
       <motion.div
         className="book__floor-shadow"
-        variants={activeShadowVariants}
+        variants={shadowVariants[tier]}
         aria-hidden="true"
       />
     </motion.div>
   );
 }
-
-export default Book;

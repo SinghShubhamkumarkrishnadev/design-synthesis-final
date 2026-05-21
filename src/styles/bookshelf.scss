@@ -1,1122 +1,1277 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Design Synthesis — Bookshelf Section Styles
-// Cinematic, tactile, architectural archive aesthetic [Light Luxury Theme]
-// ─────────────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// bookshelf.scss — Design Synthesis · Works Archive
+// Matches the project's existing visual identity:
+//   · Soft off-white/pale-sage background
+//   · Deep forest green (#0D2B1E) accent palette
+//   · Glassmorphism surfaces, pill elements
+//   · Organic sketch-line decorative motifs
+//   · Premium Cormorant Garamond typography
+//   · No dark heavy blocks — light, airy, premium
+// ═══════════════════════════════════════════════════════════════════════════════
 
-@use "sass:math";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
-// ── Google Fonts ──────────────────────────────────────────────────────────────
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Barlow+Condensed:wght@300;400;500;600&family=Jost:wght@200;300;400;500&display=swap");
-
-// ── CSS Custom Properties ─────────────────────────────────────────────────────
+// ── 1. Design Tokens ─────────────────────────────────────────────────────────
 :root {
-  --bs-bg:            #F8F5EF;
-  --bs-bg-warm:       #F3EEE5;
+  // ── Background palette — matches site pale sage/off-white ─────────────
+  --bs-bg-base:          #F0EDE6;
+  --bs-bg-warm:          #EAE6DC;
+  --bs-bg-deep:          #E2DDD1;
+  --bs-bg-card:          rgba(255, 255, 255, 0.72);
+  --bs-bg-glass:         rgba(255, 255, 255, 0.55);
+  --bs-bg-glass-border:  rgba(255, 255, 255, 0.80);
 
-  --bs-wood-dark:     #8B5E3C;
-  --bs-wood-mid:      #A87449;
-  --bs-wood-light:    #C08A5A;
-  --bs-wood-edge:     #6F4A2D;
-  --bs-shelf-lip:     #5B3C24;
+  // ── Forest green — primary brand color from reference ─────────────────
+  --bs-green-900:        #0D2B1E;   // deepest — footer bg
+  --bs-green-800:        #14382A;   // dark headers
+  --bs-green-700:        #1B4835;   // rich green
+  --bs-green-600:        #235E44;   // mid
+  --bs-green-500:        #2D7356;   // accent
+  --bs-green-400:        #3D8F6A;   // lighter accent
+  --bs-green-200:        rgba(45, 115, 86, 0.14);
+  --bs-green-100:        rgba(45, 115, 86, 0.07);
+  --bs-green-tint:       rgba(13, 43, 30, 0.06);
 
-  --bs-ambient:       #E4C39A;
-  --bs-ambient-cool:  #D8E1E8;
+  // ── Wood palette — light, warm, sage-toned ────────────────────────────
+  // Shifted to warm greenish-tan to complement forest green theme
+  --bs-wood-shadow:      #2A3D2E;   // darkest — only for deep shadows
+  --bs-wood-dark:        #4A5E42;   // dark panel
+  --bs-wood-mid:         #6B7D5E;   // mid panel
+  --bs-wood-warm:        #8E9E7E;   // main plank
+  --bs-wood-light:       #B0BC9E;   // light plank
+  --bs-wood-highlight:   #CDD5BE;   // highlight
+  --bs-wood-edge:        rgba(107, 125, 94, 0.45);
+  --bs-wood-inner:       #1A2A1C;   // cavity — kept dark for book contrast
 
-  --bs-text-primary:  #2B221B;
-  --bs-text-muted:    #6E6257;
-  --bs-text-accent:   #A06F45;
+  // ── Typography ────────────────────────────────────────────────────────
+  --bs-text-primary:     #0D2B1E;   // deep forest green — matches reference headings
+  --bs-text-secondary:   #235E44;
+  --bs-text-accent:      #2D7356;
+  --bs-text-muted:       rgba(13, 43, 30, 0.48);
+  --bs-text-light:       rgba(13, 43, 30, 0.62);
+  --bs-text-on-dark:     rgba(255, 255, 255, 0.88);
 
-  --bs-gold:          #B8864A;
+  // ── Shadows — soft, organic ───────────────────────────────────────────
+  --bs-shadow-sm:        0 2px 12px rgba(13, 43, 30, 0.08);
+  --bs-shadow-md:        0 4px 24px rgba(13, 43, 30, 0.12);
+  --bs-shadow-lg:        0 8px 40px rgba(13, 43, 30, 0.16);
+  --bs-shadow-cabinet:   0 12px 50px rgba(13, 43, 30, 0.20);
 
-  --bs-vignette:      rgba(210, 190, 165, 0.18);
+  // ── Glow — green ambient ──────────────────────────────────────────────
+  --bs-glow-soft:        rgba(45, 115, 86, 0.10);
+  --bs-led:              rgba(100, 200, 140, 0.18);
 
-  --font-display:     'Cormorant Garamond', Georgia, serif;
-  --font-spine:       'Barlow Condensed', sans-serif;
-  --font-ui:          'Jost', system-ui, sans-serif;
-
-  --ease-cinematic:   cubic-bezier(0.25, 0.1, 0.25, 1);
-  --ease-out-expo:    cubic-bezier(0.16, 1, 0.3, 1);
+  // ── Fonts ─────────────────────────────────────────────────────────────
+  --font-display:        'Cormorant Garamond', Georgia, serif;
+  --font-body:           'DM Sans', system-ui, sans-serif;
 }
 
-// ── Mixins ────────────────────────────────────────────────────────────────────
-@mixin wood-grain($angle: 90deg) {
-  background-image:
-    repeating-linear-gradient(
-      #{$angle},
-      transparent 0px,
-      transparent 18px,
-      rgba(0, 0, 0, 0.025) 18px,
-      rgba(0, 0, 0, 0.025) 20px
-    ),
-    repeating-linear-gradient(
-      #{$angle + 7deg},
-      transparent 0px,
-      transparent 38px,
-      rgba(255, 255, 255, 0.015) 38px,
-      rgba(255, 255, 255, 0.015) 39px
-    );
+
+// ── 2. Keyframes ─────────────────────────────────────────────────────────────
+@keyframes section-in    { from { opacity: 0 } to { opacity: 1 } }
+@keyframes header-up     { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: none } }
+@keyframes shelf-rise    {
+  from { opacity: 0; transform: perspective(1200px) rotateY(2deg) rotateX(0.6deg) translateY(28px) }
+  to   { opacity: 1; transform: perspective(1200px) rotateY(2deg) rotateX(0.6deg) translateY(0)    }
+}
+@keyframes shelf-rise-flat {
+  from { opacity: 0; transform: translateY(20px) }
+  to   { opacity: 1; transform: none }
+}
+@keyframes led-breathe   { 0%, 100% { opacity: 0.55 } 50% { opacity: 0.90 } }
+@keyframes ambient-drift { 0%, 100% { opacity: 0.35 } 50% { opacity: 0.65 } }
+
+@keyframes dust-a {
+  0%,100% { transform: translate(0,0) rotate(0deg);    opacity: 0.40 }
+  30%      { transform: translate(6px,-10px) rotate(1.2deg); opacity: 0.65 }
+  65%      { transform: translate(2px,-18px) rotate(-0.6deg); opacity: 0.32 }
+}
+@keyframes dust-b {
+  0%,100% { transform: translate(0,0); opacity: 0.36 }
+  40%      { transform: translate(-8px,-13px) rotate(-1deg); opacity: 0.58 }
+  75%      { transform: translate(5px,-22px); opacity: 0.28 }
+}
+@keyframes dust-c {
+  0%,100% { transform: translate(0,0); opacity: 0.44 }
+  55%      { transform: translate(9px,-11px); opacity: 0.30 }
 }
 
-@mixin material-grain {
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      radial-gradient(circle at 25% 30%, rgba(255,255,255,0.04) 1px, transparent 1px),
-      radial-gradient(circle at 72% 68%, rgba(0,0,0,0.06) 1px, transparent 1px),
-      radial-gradient(circle at 48% 55%, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 3px 3px, 5px 5px, 7px 7px;
-    pointer-events: none;
-    z-index: 2;
-  }
-}
 
-// ── Responsive Breakpoints ────────────────────────────────────────────────────
-$bp-mobile:  640px;
-$bp-tablet:  900px;
-$bp-desktop: 1400px;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// WORKS SECTION WRAPPER
-// ─────────────────────────────────────────────────────────────────────────────
+// ── 3. Works Section ─────────────────────────────────────────────────────────
 .works-section {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  background-color: var(--bs-bg);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  animation: section-in 0.6s ease both;
 
+  // ── CSS-only background — pale sage matching the reference ─────────────
+  background-color: var(--bs-bg-base);
+  background-image:
+    // Subtle top-left warmth (matches site light sourcing)
+    radial-gradient(ellipse 70% 50% at 12% 0%, rgba(255, 252, 244, 0.82) 0%, transparent 65%),
+    // Soft green ambient at right — echoes brand colour
+    radial-gradient(ellipse 55% 75% at 100% 55%, rgba(45, 115, 86, 0.05) 0%, transparent 60%),
+    // Slight floor warmth
+    linear-gradient(to top, rgba(13, 43, 30, 0.05) 0%, transparent 20%),
+    // Main gradient — warm light surface
+    linear-gradient(168deg, #F7F4EE 0%, #EDE9DF 42%, #E5DFD1 72%, #DEDAD0 100%);
+
+  // Fine linen texture
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(
-        ellipse 80% 50% at 50% 0%,
-        rgba(255, 240, 220, 0.75) 0%,
-        transparent 65%
-      ),
-      radial-gradient(
-        ellipse 60% 40% at 50% 100%,
-        rgba(210, 180, 140, 0.25) 0%,
-        transparent 80%
-      );
+    background-image:
+      repeating-linear-gradient(0deg,   transparent 0, transparent 3px, rgba(13,43,30,0.018) 3px, rgba(13,43,30,0.018) 4px),
+      repeating-linear-gradient(90deg,  transparent 0, transparent 5px, rgba(13,43,30,0.012) 5px, rgba(13,43,30,0.012) 6px);
     pointer-events: none;
     z-index: 0;
   }
+
+  // Corner vignette
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 90% 90% at 0% 0%,   rgba(13,43,30,0.05) 0%, transparent 48%),
+      radial-gradient(ellipse 50% 35% at 100% 100%, rgba(13,43,30,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  > * { position: relative; z-index: 1; }
 }
 
-// ── Section Header ────────────────────────────────────────────────────────────
+// Organic sketch decorative lines (SVG background layer — optional enhancement)
+// These can be placed via a pseudo or inline SVG without image dependency.
+.works-section__deco-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.18;
+
+  svg {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 55%;
+    max-width: 420px;
+  }
+}
+
+// ── 4. Section Header — centered ─────────────────────────────────────────────
 .works-section__header {
-  position: relative;
-  z-index: 10;
-  text-align: center;
-  padding: 7rem 2rem 0;
+  width: 100%;
+  padding: 4rem clamp(1.5rem, 6vw, 6rem) 1.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  text-align: center;
+  gap: 0.7rem;
+  animation: header-up 0.75s cubic-bezier(0.25, 0.1, 0.25, 1) 0.1s both;
 
-  @media (max-width: $bp-tablet) {
-    padding-top: 5rem;
-  }
-
-  @media (max-width: $bp-mobile) {
-    padding-top: 3.5rem;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    gap: 0.75rem;
-  }
+  @media (max-width: 900px) { padding: 3rem 2rem 1.5rem; }
+  @media (max-width: 640px) { padding: 2.25rem 1.25rem 1.25rem; gap: 0.55rem; }
 }
 
 .works-section__eyebrow {
-  font-family: var(--font-spine);
-  font-size: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-body);
+  font-size: clamp(0.60rem, 0.90vw, 0.72rem);
   font-weight: 400;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--bs-text-accent);
-  opacity: 0.8;
+  opacity: 0.85;
 
-  @media (max-width: $bp-mobile) {
-    font-size: 0.6rem;
-    letter-spacing: 0.25em;
+  &::before, &::after {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 1px;
+    background: var(--bs-text-accent);
+    opacity: 0.45;
   }
 }
 
 .works-section__title {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-size: clamp(2rem, 4.5vw, 3.8rem);
   font-weight: 300;
+  line-height: 1.08;
   color: var(--bs-text-primary);
-  letter-spacing: -0.01em;
-  line-height: 1;
+  margin: 0;
+  letter-spacing: 0.01em;
 
   em {
     font-style: italic;
-    color: var(--bs-text-accent);
+    font-weight: 400;
+    color: var(--bs-green-600);
   }
+
+  @media (max-width: 640px) { font-size: clamp(1.8rem, 9vw, 2.6rem); }
 }
 
 .works-section__rule {
-  width: 48px;
+  width: 40px;
   height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    var(--bs-gold),
-    transparent
-  );
-  margin-top: 0.5rem;
-  opacity: 0.6;
+  background: linear-gradient(to right, transparent, var(--bs-green-500), transparent);
+  opacity: 0.45;
+  margin: 0.05rem 0;
 }
 
 .works-section__subtitle {
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
+  font-family: var(--font-display);
+  font-size: clamp(0.82rem, 1.2vw, 0.96rem);
   font-weight: 300;
-  letter-spacing: 0.12em;
-  color: var(--bs-text-muted);
-  max-width: 38ch;
-  line-height: 1.6;
-  text-align: center;
-
-  @media (max-width: $bp-mobile) {
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    max-width: 30ch;
-  }
+  font-style: italic;
+  color: var(--bs-text-light);
+  line-height: 1.85;
+  max-width: 400px;
+  margin: 0;
 }
 
-// ── Section Footer ─────────────────────────────────────────────────────────
-.works-section__footer {
-  position: relative;
-  z-index: 10;
-  padding: 3rem 2rem 5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
 
-  @media (max-width: $bp-mobile) {
-    padding: 2rem 1.5rem 3.5rem;
+// ── 5. Body layout ───────────────────────────────────────────────────────────
+.works-section__body {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(2rem, 4vw, 5rem);
+  padding: 0 clamp(1rem, 4vw, 5rem) 0 clamp(1.5rem, 6vw, 6rem);
+
+  @media (max-width: 900px) {
+    flex-direction: column-reverse;
+    align-items: center;
+    padding: 0 2rem;
+    gap: 1.5rem;
+  }
+  @media (max-width: 640px) {
+    flex-direction: column-reverse;
+    align-items: center;
+    padding: 0;
     gap: 1.25rem;
   }
 }
 
-.works-section__footer-line {
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(196, 149, 106, 0.3));
+.works-section__shelf-col { flex-shrink: 0; }
 
-  &:last-child {
-    background: linear-gradient(to left, transparent, rgba(196, 149, 106, 0.3));
+.works-section__info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-top: 1.25rem;
+
+  @media (max-width: 900px) {
+    width: 100%;
+    max-width: 540px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding: 0 2rem;
   }
-
-  @media (max-width: $bp-mobile) {
-    width: 36px;
+  @media (max-width: 640px) {
+    flex-direction: column;
+    padding: 0 1.25rem;
+    gap: 1.1rem;
+    padding-top: 0.5rem;
   }
 }
 
-.works-section__footer-text {
-  font-family: var(--font-spine);
-  font-size: 0.6rem;
-  letter-spacing: 0.3em;
+
+// ── 6. Info — Interaction Hint card ──────────────────────────────────────────
+// Matches the glassmorphism pill/card style from reference image
+.info-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: var(--bs-bg-glass);
+  border: 1px solid var(--bs-bg-glass-border);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--bs-shadow-sm), inset 0 1px 0 rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @media (max-width: 900px) { flex: 1; min-width: 200px; }
+}
+
+.info-hint__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bs-green-200);
+  border: 1px solid rgba(45, 115, 86, 0.20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-green-600);
+  margin-top: 1px;
+}
+
+.info-hint__lead {
+  font-family: var(--font-body);
+  font-size: clamp(0.80rem, 1.05vw, 0.88rem);
+  font-weight: 500;
+  color: var(--bs-text-primary);
+  margin: 0 0 0.3rem;
+  letter-spacing: 0.01em;
+}
+
+.info-hint__body {
+  font-family: var(--font-display);
+  font-size: clamp(0.76rem, 0.95vw, 0.84rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--bs-text-light);
+  margin: 0;
+  line-height: 1.72;
+}
+
+
+// ── 7. Info — Stats ──────────────────────────────────────────────────────────
+.info-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+
+  @media (max-width: 900px) {
+    flex: 1;
+    min-width: 160px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1.1rem;
+  }
+  @media (max-width: 640px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+.info-stat { display: flex; flex-direction: column; gap: 0.18rem; }
+
+.info-stat__number {
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 2.6vw, 2.4rem);
+  font-weight: 300;
+  color: var(--bs-green-700);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.info-stat__label {
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--bs-text-muted);
-  opacity: 0.6;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BOOKSHELF SCENE
-// ─────────────────────────────────────────────────────────────────────────────
-.bookshelf-scene {
-  position: relative;
-  z-index: 5;
+.info-quote {
+  font-family: var(--font-display);
+  font-size: clamp(0.86rem, 1.25vw, 1.04rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--bs-text-light);
+  line-height: 1.88;
+  max-width: 230px;
+  margin: 0;
+  padding-left: 0.85rem;
+  border-left: 2px solid rgba(45, 115, 86, 0.22);
+
+  @media (max-width: 900px) { display: none; }
+}
+
+
+// ── 8. Scene Wrapper ─────────────────────────────────────────────────────────
+.works-scene {
   width: 100%;
-  max-width: 960px;
-  margin: 4rem auto 2rem;
-  padding: 0 2rem;
+  display: flex;
+  align-items: flex-end;
 
-  perspective: 1800px;
-  perspective-origin: 50% 40%;
+  @media (max-width: 900px) { justify-content: center; }
+}
 
-  @media (max-width: $bp-tablet) {
-    perspective: 1200px;
-    margin: 3rem auto 1.5rem;
-    padding: 0 1.25rem;
+
+// ── 9. Bookshelf Cabinet — light sage-green wood ──────────────────────────────
+.bookshelf-cabinet {
+  position: relative;
+  width: clamp(260px, 48vw, 590px);
+  flex-shrink: 0;
+
+  // Floor shadow — soft
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 10%; right: 10%;
+    height: 18px;
+    background: radial-gradient(ellipse 84% 50% at 50% 0%, rgba(13,43,30,0.20) 0%, transparent 100%);
+    filter: blur(5px);
+    z-index: 0;
+    border-radius: 50%;
   }
 
-  @media (max-width: $bp-mobile) {
-    perspective: none;
-    margin: 2rem auto 1rem;
-    padding: 0;
+  // Wall bloom — very soft on light bg
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -18px -28px;
+    background: radial-gradient(ellipse 70% 62% at 50% 46%, rgba(13,43,30,0.10) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 12px;
+  }
+
+  > * { position: relative; z-index: 1; }
+
+  // Subtle perspective on desktop
+  transform-style: preserve-3d;
+  transform: perspective(1200px) rotateY(2deg) rotateX(0.6deg);
+  transition: transform 0.65s cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  &:hover { transform: perspective(1200px) rotateY(0.4deg) rotateX(0.15deg); }
+
+  animation: shelf-rise 0.90s cubic-bezier(0.25, 0.1, 0.25, 1) 0.2s both;
+
+  @media (max-width: 900px) {
+    width: clamp(250px, 80vw, 520px);
+    transform: none;
+    animation: shelf-rise-flat 0.80s cubic-bezier(0.25, 0.1, 0.25, 1) 0.18s both;
+    &:hover { transform: none; }
+    &::after { bottom: -10px; height: 12px; }
+  }
+  @media (max-width: 640px) {
+    width: clamp(230px, 94vw, 380px);
+    transform: none;
+    &:hover { transform: none; }
   }
 }
+
+// Crown molding — soft sage wood
+.cabinet__crown {
+  height: 20px;
+  background: linear-gradient(180deg,
+    var(--bs-wood-highlight) 0%,
+    var(--bs-wood-light)     30%,
+    var(--bs-wood-warm)      65%,
+    var(--bs-wood-mid)       100%
+  );
+  border: 1px solid var(--bs-wood-edge);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  box-shadow:
+    0 -3px 12px rgba(13,43,30,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    inset 0 -1px 0 rgba(13,43,30,0.14);
+  position: relative;
+  overflow: hidden;
+
+  // Grain
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg,
+      transparent 0, transparent 52px, rgba(13,43,30,0.022) 52px, rgba(13,43,30,0.022) 53px
+    );
+  }
+
+  // Inlay
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 10%; right: 10%;
+    height: 1px;
+    transform: translateY(-50%);
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.45), rgba(255,255,255,0.60), rgba(255,255,255,0.45), transparent);
+  }
+
+  @media (max-width: 640px) { height: 13px; border-radius: 5px 5px 0 0; }
+}
+
+.cabinet__body {
+  display: flex;
+  align-items: stretch;
+  background: var(--bs-wood-mid);
+  border-left: 1px solid var(--bs-wood-edge);
+  border-right: 1px solid var(--bs-wood-edge);
+  box-shadow:
+    -10px 0 35px rgba(13,43,30,0.14),
+    10px  0 35px rgba(13,43,30,0.11),
+    0 18px 55px rgba(13,43,30,0.24),
+    inset 2px 0 7px rgba(0,0,0,0.16),
+    inset -2px 0 7px rgba(0,0,0,0.16);
+}
+
+.cabinet__panel {
+  width: clamp(12px, 2vw, 20px);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(180deg,
+      transparent 0, transparent 16px, rgba(0,0,0,0.028) 16px, rgba(0,0,0,0.028) 17px
+    );
+  }
+
+  &--left {
+    background: linear-gradient(to right, var(--bs-wood-dark), var(--bs-wood-warm) 65%, var(--bs-wood-mid));
+    box-shadow: inset -2px 0 6px rgba(0,0,0,0.18);
+    border-right: 1px solid rgba(107,125,94,0.20);
+  }
+  &--right {
+    background: linear-gradient(to left, var(--bs-wood-dark), var(--bs-wood-warm) 65%, var(--bs-wood-mid));
+    box-shadow: inset 2px 0 6px rgba(0,0,0,0.18);
+    border-left: 1px solid rgba(107,125,94,0.20);
+  }
+
+  @media (max-width: 640px) { width: 9px; }
+}
+
+.cabinet__inner {
+  flex: 1;
+  position: relative;
+  // Dark cavity to make books pop — but not harshly dark
+  background: linear-gradient(180deg,
+    #1A2A1C 0%,
+    #1E3020 42%,
+    #1A2A1C 100%
+  );
+  overflow: hidden;
+  box-shadow: inset 0 5px 16px rgba(0,0,0,0.45);
+}
+
+.cabinet__base {
+  height: 18px;
+  background: linear-gradient(180deg,
+    var(--bs-wood-warm)    0%,
+    var(--bs-wood-mid)     45%,
+    var(--bs-wood-dark)    75%,
+    var(--bs-wood-shadow)  100%
+  );
+  border: 1px solid var(--bs-wood-edge);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    0 6px 28px rgba(13,43,30,0.38),
+    0 14px 45px rgba(13,43,30,0.20),
+    0 2px 4px rgba(0,0,0,0.60),
+    inset 0 1px 0 rgba(255,255,255,0.14);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.22), transparent);
+  }
+
+  @media (max-width: 640px) { height: 11px; border-radius: 0 0 5px 5px; }
+}
+
+
+// ── 10. Inner scene ───────────────────────────────────────────────────────────
+.bookshelf-scene { position: relative; width: 100%; }
 
 .bookshelf-scene__inner {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  transform-style: preserve-3d;
+  padding: 0;
+}
 
-  @media (max-width: $bp-mobile) {
-    transform-style: flat;
+.scene-top-frame {
+  width: 100%;
+  height: 13px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 0.75rem;
+  flex-shrink: 0;
+  margin-bottom: 1px;
+
+  .frame-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right,
+      transparent, rgba(100,200,140,0.16), rgba(100,200,140,0.28), rgba(100,200,140,0.16), transparent
+    );
+    &:last-child {
+      background: linear-gradient(to left,
+        transparent, rgba(100,200,140,0.16), rgba(100,200,140,0.28), rgba(100,200,140,0.16), transparent
+      );
+    }
+  }
+
+  .frame-gem {
+    width: 3px; height: 3px;
+    border: 1px solid rgba(100,200,140,0.34);
+    transform: rotate(45deg);
+    flex-shrink: 0;
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SHELF ROW
-// ─────────────────────────────────────────────────────────────────────────────
+.scene-bottom-rail {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  margin-top: 1px;
+  background: linear-gradient(180deg,
+    var(--bs-wood-warm) 0%, var(--bs-wood-mid) 52%, var(--bs-wood-dark) 100%
+  );
+  border-top: 1px solid rgba(107,125,94,0.45);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 14px rgba(0,0,0,0.38);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 8%; right: 8%;
+    height: 1px;
+    background: linear-gradient(to right,
+      transparent, rgba(255,255,255,0.18), rgba(255,255,255,0.28), rgba(255,255,255,0.18), transparent
+    );
+  }
+
+  @media (max-width: 640px) { height: 10px; }
+}
+
+
+// ── 11. Ambient Lighting ─────────────────────────────────────────────────────
+.ambient-lighting {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.ambient-lighting__top-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 45%;
+  background: radial-gradient(ellipse 58% 48% at 40% 0%, rgba(100,200,140,0.09) 0%, transparent 100%);
+  animation: ambient-drift 10s ease-in-out infinite;
+}
+
+.ambient-lighting__left-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0; width: 28%;
+  background: linear-gradient(to right, rgba(100,200,140,0.04), transparent);
+}
+
+.ambient-lighting__right-fill {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; width: 18%;
+  background: linear-gradient(to left, rgba(100,200,140,0.03), transparent);
+}
+
+.ambient-lighting__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 86% 86% at 50% 50%, transparent 46%, rgba(0,0,0,0.22) 100%);
+}
+
+.ambient-lighting__shelf-glow {
+  position: absolute;
+  left: 5%; right: 5%;
+  height: 16px;
+  transform: translateY(-50%);
+  background: radial-gradient(ellipse 72% 100% at 50% 100%, var(--bs-led), transparent 90%);
+  animation: led-breathe 7s ease-in-out infinite;
+}
+
+
+// ── 12. Dust Particles ────────────────────────────────────────────────────────
+.dust-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+
+.dust-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(100, 200, 140, 0.70);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  will-change: transform;
+}
+
+
+// ── 13. Shelf Row ─────────────────────────────────────────────────────────────
 .shelf-row {
   position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: 0;
+  &:first-of-type .shelf-inner-shadow { display: none; }
 }
 
-// ── Shelf Back Wall ───────────────────────────────────────────────────────────
-.shelf-back {
-  position: absolute;
-  inset: 0;
-  bottom: 0;
-  top: auto;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 250, 245, 0.75) 0%,
-    rgba(240, 228, 212, 0.45) 100%
-  );
-  z-index: 0;
+.shelf-inner-shadow {
+  width: 100%;
+  height: 9px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.36) 0%, transparent 100%);
+  pointer-events: none;
+  flex-shrink: 0;
 }
 
-// ── Books Container ────────────────────────────────────────────────────────────
 .shelf-books {
-  position: relative;
-  z-index: 5;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  gap: 10px;
-  padding: 0 32px;
-  min-height: 300px;
+  gap: 3px;
+  padding: 9px 0.8rem 0;
+  position: relative;
+  z-index: 2;
+  min-height: clamp(68px, 10.5vw, 102px);
 
-  @media (max-width: $bp-tablet) {
-    gap: 6px;
-    padding: 0 18px;
-    min-height: 260px;
+  @media (max-width: 900px) {
+    gap: 2px;
+    padding: 7px 0.65rem 0;
+    min-height: clamp(60px, 9.5vw, 90px);
   }
-
-  // No mobile override here — handled by mobile shelf layout below
+  @media (max-width: 640px) {
+    gap: 2px;
+    padding: 7px 0.6rem 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    min-height: 68px;
+    flex-wrap: nowrap;
+    &::-webkit-scrollbar { display: none; }
+  }
 }
 
-// ── Shelf Plank ────────────────────────────────────────────────────────────────
+.shelf-label-mobile {
+  padding: 0.7rem 0.6rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  .shelf-label__text {
+    font-family: var(--font-body);
+    font-size: 0.52rem;
+    font-weight: 400;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--bs-text-accent);
+    opacity: 0.58;
+    flex-shrink: 0;
+  }
+  .shelf-label__line {
+    flex: 1; height: 1px;
+    background: linear-gradient(to right, rgba(45,115,86,0.22), transparent);
+  }
+}
+
+.bookend {
+  width: clamp(8px, 1.4vw, 13px);
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bookend__block {
+  width: clamp(8px, 1.4vw, 13px);
+  height: clamp(34px, 7vw, 58px);
+  position: relative;
+
+  .bookend__foot {
+    position: absolute;
+    bottom: -2px;
+    width: 148%;
+    height: 3px;
+    background: var(--bs-wood-mid);
+    border-radius: 1px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.32);
+  }
+}
+
+.bookend--left .bookend__block {
+  background: linear-gradient(to right, var(--bs-wood-dark), var(--bs-wood-warm));
+  box-shadow: inset -1px 0 3px rgba(255,255,255,0.06), 2px 0 4px rgba(0,0,0,0.28);
+  border-radius: 1px 0 0 1px;
+  .bookend__foot { left: 0; }
+}
+
+.bookend--right .bookend__block {
+  background: linear-gradient(to left, var(--bs-wood-dark), var(--bs-wood-warm));
+  box-shadow: inset 1px 0 3px rgba(255,255,255,0.06), -2px 0 4px rgba(0,0,0,0.28);
+  border-radius: 0 1px 1px 0;
+  .bookend__foot { right: 0; }
+}
+
 .shelf-plank {
   position: relative;
-  z-index: 10;
-  width: 100%;
-  height: 20px;
-  @include wood-grain(92deg);
-  background-color: var(--bs-wood-mid);
-  border-radius: 1px 1px 0 0;
-  overflow: visible;
-
-  background-image:
-    repeating-linear-gradient(
-      92deg,
-      transparent 0px,
-      transparent 22px,
-      rgba(0, 0, 0, 0.03) 22px,
-      rgba(0, 0, 0, 0.03) 24px
-    ),
-    repeating-linear-gradient(
-      97deg,
-      transparent 0px,
-      transparent 44px,
-      rgba(255, 255, 255, 0.015) 44px,
-      rgba(255, 255, 255, 0.015) 45px
-    ),
-    linear-gradient(
-      to bottom,
-      #D4A373 0%,
-      #C38B5C 40%,
-      #B77A48 70%,
-      #9F6538 100%
-    );
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(200, 160, 90, 0.25) 20%,
-      rgba(220, 180, 100, 0.3) 50%,
-      rgba(200, 160, 90, 0.25) 80%,
-      transparent 100%
-    );
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    height: 12px;
-    background: linear-gradient(
-      to bottom,
-      #A36A3E 0%,
-      #8B5A34 60%,
-      #724728 100%
-    );
-    border-radius: 0 0 2px 2px;
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.15),
-      0 8px 32px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (max-width: $bp-tablet) {
-    height: 16px;
-
-    &::after {
-      height: 10px;
-    }
-  }
-}
-
-// ── Shelf Inner Shadow ─────────────────────────────────────────────────────────
-.shelf-inner-shadow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.08) 0%,
-    transparent 100%
-  );
-  z-index: 6;
-  pointer-events: none;
-}
-
-// ── Shelf Bottom Shadow ───────────────────────────────────────────────────────
-.shelf-shadow-below {
-  position: relative;
+  height: 11px;
   z-index: 3;
-  height: 40px;
-  margin-bottom: 48px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.08) 0%,
-    rgba(0, 0, 0, 0.03) 50%,
-    transparent 100%
+  background: linear-gradient(180deg,
+    var(--bs-wood-highlight) 0%,
+    var(--bs-wood-light)     18%,
+    var(--bs-wood-warm)      55%,
+    var(--bs-wood-mid)       100%
   );
-  pointer-events: none;
+  border-top: 1px solid rgba(107,125,94,0.50);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 3px 12px rgba(0,0,0,0.40),
+    0 1px 2px rgba(0,0,0,0.62);
 
-  @media (max-width: $bp-tablet) {
-    height: 28px;
-    margin-bottom: 36px;
+  // Grain
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg,
+      transparent 0, transparent 38px, rgba(0,0,0,0.024) 38px, rgba(0,0,0,0.024) 39px
+    );
   }
+
+  // Ambient led under plank
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 5%; right: 5%;
+    height: 6px;
+    background: radial-gradient(ellipse 76% 100% at 50% 0%, rgba(100,200,140,0.14), transparent);
+    pointer-events: none;
+    animation: led-breathe 8s ease-in-out infinite;
+  }
+
+  @media (max-width: 640px) { height: 8px; }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BOOK — desktop + tablet
-// ─────────────────────────────────────────────────────────────────────────────
+.shelf-shadow-below { width: 100%; pointer-events: none; }
+.shelf-shadow { width: 100%; position: relative; }
+
+.shelf-shadow__contact {
+  width: 82%; margin: 0 auto;
+  height: 3px;
+  background: rgba(0,0,0, calc(0.36 * var(--shadow-intensity, 1)));
+  filter: blur(2px);
+  border-radius: 50%;
+}
+
+.shelf-shadow__cast {
+  width: 78%; margin: 0 auto;
+  height: 28px;
+  background: linear-gradient(180deg,
+    rgba(0,0,0, calc(0.15 * var(--shadow-intensity, 1))) 0%, transparent 100%
+  );
+}
+
+
+// ── 14. Book Component ────────────────────────────────────────────────────────
 .book {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   cursor: pointer;
-  flex-shrink: 0;
+  outline: none;
+  overflow: visible;
+  padding-top: 60px;   // space for hover card above
 
-  --book-color:       #1A1918;
-  --book-gradient:    linear-gradient(105deg, rgba(255,255,255,0.08) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.3) 100%);
-  --book-text:        #B8A98A;
-  --book-accent:      #C4956A;
-  --book-page:        #EDE4D4;
-  --book-h:           240px;
-  --book-w:           46px;
-
-  &:hover {
-    .book__spine {
-      box-shadow:
-        -2px 0 8px rgba(0,0,0,0.2),
-        2px 0 4px rgba(0,0,0,0.15),
-        0 -4px 24px rgba(0,0,0,0.1),
-        inset 0 0 0 0 transparent;
-    }
-
-    .book__label {
-      opacity: 1;
-    }
-
-    .book__floor-shadow {
-      transform: scaleX(1.25) translateY(2px);
-      opacity: 0.35;
-    }
+  &:focus-visible .book__spine {
+    outline: 2px solid rgba(45,115,86,0.60);
+    outline-offset: 2px;
   }
 
-  // Tablet: scale books down proportionally
-  @media (max-width: $bp-tablet) and (min-width: #{$bp-mobile + 1}) {
-    --book-h: calc(var(--book-h) * 0.85);
-    --book-w: calc(var(--book-w) * 0.85);
+  @media (max-width: 640px) {
+    padding-top: 6px;
+    flex-shrink: 0;
   }
 }
 
+// ── Hover/tap card — clean glass card above book ──────────────────────────────
+.book__label {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 30;
+
+  // Glass card — matches site's glassmorphism pill style
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 7px 11px 8px;
+  box-shadow:
+    0 4px 20px rgba(13,43,30,0.14),
+    0 1px 4px rgba(13,43,30,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  min-width: 74px;
+}
+
+.book__label-title {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bs-text-primary);
+  display: block;
+  line-height: 1.2;
+}
+
+.book__label-divider {
+  width: 18px;
+  height: 1px;
+  background: rgba(45,115,86,0.22);
+  display: block;
+}
+
+.book__label-meta {
+  font-family: var(--font-display);
+  font-size: 0.54rem;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.03em;
+  color: var(--bs-text-accent);
+  display: block;
+}
+
+// Book wrapper — lift animation target
 .book__wrapper {
   position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  transform-style: preserve-3d;
+  align-items: flex-end;
+  filter: url(#ds-grain);
 }
 
+// Top surface 3-D illusion
 .book__top {
   position: absolute;
-  top: 0;
-  left: 2px;
-  right: -8px;
+  top: -4px;
+  left: 0; right: 7px;
   height: 6px;
-  transform-origin: bottom left;
-  transform: translateY(-5px) skewX(-18deg);
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(200, 175, 140, 0.15) 40%,
-    rgba(180, 155, 110, 0.1) 100%
-  );
-  z-index: 2;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 100%);
+  transform-origin: bottom;
+  transform: rotateX(58deg) translateY(-3px);
+  border-top: 1px solid rgba(255,255,255,0.20);
 }
 
 .book__spine {
+  width: var(--book-w, 30px);
+  height: var(--book-h, 100px);
+  background: var(--book-gradient, var(--book-color, #2D7356));
   position: relative;
-  width: var(--book-w);
-  height: var(--book-h);
-  background-color: var(--book-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   overflow: hidden;
-  transition: box-shadow 0.45s var(--ease-cinematic);
-
-  box-shadow:
-    -1px 0 4px rgba(0, 0, 0, 0.2),
-    2px 0 6px rgba(0, 0, 0, 0.15),
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 0 0 0 transparent;
+  border-left: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.30);
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     inset: 0;
-    background: var(--book-gradient);
-    z-index: 1;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.2),
-      rgba(255, 255, 255, 0.08)
+    background: linear-gradient(108deg,
+      rgba(255,255,255,0.12) 0%,
+      rgba(255,255,255,0.04) 44%,
+      transparent 66%
     );
+    pointer-events: none;
     z-index: 3;
+    transition: opacity 0.28s ease;
   }
+  .book:hover &::before { opacity: 0.55; }
 }
 
 .book__binding {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 14px;
-  z-index: 4;
+  left: 0; right: 0;
+  height: 7px;
+  z-index: 2;
+  background: rgba(0,0,0,0.16);
 
   &--top {
-    top: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.15), transparent);
-
-    &::after {
-      content: "";
-      position: absolute;
-      top: 6px;
-      left: 3px;
-      right: 3px;
-      height: 1px;
-      background: linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent);
-    }
+    top: 7px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.20);
   }
-
   &--bottom {
-    bottom: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
-
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 6px;
-      left: 3px;
-      right: 3px;
-      height: 1px;
-      background: linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent);
-    }
+    bottom: 7px;
+    border-bottom: 1px solid rgba(0,0,0,0.26);
   }
 }
 
 .book__grain {
   position: absolute;
   inset: 0;
-  z-index: 2;
-  background-image:
-    radial-gradient(circle at 20% 40%, rgba(255,255,255,0.03) 1px, transparent 1px),
-    radial-gradient(circle at 75% 25%, rgba(0,0,0,0.05) 1px, transparent 1px),
-    radial-gradient(circle at 50% 70%, rgba(255,255,255,0.025) 1px, transparent 1px),
-    radial-gradient(circle at 30% 85%, rgba(0,0,0,0.04) 1px, transparent 1px);
-  background-size: 3px 3px, 4px 4px, 5px 5px, 3px 3px;
+  z-index: 1;
+  background: repeating-linear-gradient(180deg,
+    transparent 0, transparent 4px,
+    rgba(0,0,0,0.016) 4px, rgba(0,0,0,0.016) 5px
+  );
   pointer-events: none;
-  mix-blend-mode: overlay;
-  opacity: 0.8;
 }
 
 .book__content {
   position: absolute;
-  inset: 0;
-  z-index: 5;
+  inset: 18px 0;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 18px 0;
+  justify-content: center;
+  z-index: 4;
   overflow: hidden;
 }
 
 .book__text-track {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 0 6px;
-  width: 100%;
-  overflow: hidden;
+  gap: 3px;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  width: calc(var(--book-h, 100px) - 44px);
 }
 
 .book__title-text {
-  font-family: var(--font-spine);
-  font-size: 10.5px;
-  font-weight: 400;
-  letter-spacing: 0.14em;
+  font-family: var(--font-display);
+  font-size: clamp(0.48rem, 0.85vw, 0.63rem);
+  font-weight: 500;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--book-text);
-  white-space: nowrap;
+  color: var(--book-text, rgba(255,255,255,0.90));
+  line-height: 1;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.40);
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  max-width: 100%;
 }
 
 .book__divider {
-  width: 1px;
-  height: 16px;
-  background: linear-gradient(to bottom, transparent, var(--book-accent), transparent);
-  opacity: 0.35;
+  width: 11px;
+  height: 1px;
+  background: var(--book-accent, rgba(255,255,255,0.35));
+  display: block;
+  opacity: 0.55;
   flex-shrink: 0;
 }
 
 .book__year-text {
-  font-family: var(--font-spine);
-  font-size: 8px;
+  font-family: var(--font-display);
+  font-size: 0.44rem;
   font-weight: 300;
-  letter-spacing: 0.2em;
-  color: var(--book-text);
-  opacity: 0.5;
-  flex-shrink: 0;
+  letter-spacing: 0.14em;
+  color: var(--book-text, rgba(255,255,255,0.65));
+  opacity: 0.70;
 }
 
 .book__publisher {
   position: absolute;
-  bottom: 18px;
+  bottom: 11px;
   left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg) translateX(50%);
-  font-family: var(--font-spine);
-  font-size: 6.5px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-family: var(--font-display);
+  font-size: 0.34rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--book-accent);
-  opacity: 0.45;
+  color: var(--book-text, rgba(255,255,255,0.32));
+  opacity: 0.36;
   white-space: nowrap;
+  z-index: 4;
+  transform-origin: center;
+  transform: translateX(-50%) rotate(-90deg) translateX(calc(var(--book-h, 100px) / 2 - 20px));
 }
 
 .book__pages {
-  position: absolute;
-  right: -9px;
-  top: 3px;
-  bottom: 3px;
-  width: 9px;
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--book-page) 0px,
-    var(--book-page) 1.2px,
-    color-mix(in srgb, var(--book-page) 60%, #b0a090) 1.2px,
-    color-mix(in srgb, var(--book-page) 60%, #b0a090) 2px
+  width: 5px;
+  height: var(--book-h, 100px);
+  background: linear-gradient(to right,
+    var(--book-page, #f0e8d8) 0%,
+    rgba(205,190,165,0.88) 50%,
+    rgba(185,168,145,0.76) 100%
   );
-  border-radius: 0 1px 1px 0;
-  box-shadow:
-    2px 0 6px rgba(0, 0, 0, 0.2),
-    inset -1px 0 0 rgba(0, 0, 0, 0.08);
-  z-index: 1;
-}
-
-.book__label {
-  position: absolute;
-  bottom: calc(100% + 14px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255, 250, 245, 0.92);
-  border: 1px solid rgba(180, 140, 90, 0.22);
-  padding: 8px 14px;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s var(--ease-cinematic);
-  pointer-events: none;
-  z-index: 20;
-  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(205,190,165,0.32);
+  border-bottom: 1px solid rgba(185,168,145,0.40);
+  border-right: 1px solid rgba(125,105,75,0.38);
+  flex-shrink: 0;
 
   &::after {
-    content: "";
+    content: '';
     position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: rgba(180, 140, 90, 0.22);
+    inset: 0;
+    background: repeating-linear-gradient(180deg,
+      transparent 0, transparent 1px, rgba(0,0,0,0.038) 1px, rgba(0,0,0,0.038) 2px
+    );
   }
-}
 
-.book__label-title {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--bs-text-primary);
-  letter-spacing: 0.06em;
-  margin-bottom: 2px;
-}
-
-.book__label-meta {
-  display: block;
-  font-family: var(--font-spine);
-  font-size: 8.5px;
-  font-weight: 300;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--bs-text-accent);
-  opacity: 0.7;
+  @media (max-width: 640px) { width: 3px; }
 }
 
 .book__floor-shadow {
-  width: var(--book-w);
-  height: 6px;
-  background: radial-gradient(
-    ellipse 90% 100% at 50% 0%,
-    rgba(0, 0, 0, 0.2),
-    transparent
-  );
-  transform-origin: bottom center;
-  transition: transform 0.45s var(--ease-cinematic), opacity 0.45s var(--ease-cinematic);
-  opacity: 0.38;
-  pointer-events: none;
+  width: var(--book-w, 30px);
+  height: 5px;
+  background: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(0,0,0,0.26), transparent);
+  margin-top: 1px;
+  flex-shrink: 0;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AMBIENT LIGHTING
-// ─────────────────────────────────────────────────────────────────────────────
-.ambient-lighting {
+
+// ── 15. Project Panel ─────────────────────────────────────────────────────────
+// Matches glassmorphism card style from reference
+.project-panel {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 1.35rem 1.5rem 1.1rem;
+  min-width: 220px;
+  max-width: 280px;
+  box-shadow:
+    0 8px 32px rgba(13,43,30,0.14),
+    0 2px 8px rgba(13,43,30,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+
+  @media (max-width: 640px) {
+    left: 1rem; right: 1rem;
+    bottom: 1rem;
+    max-width: none;
+    border-radius: 12px;
+  }
+}
+
+.project-panel__close {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
+  top: 0.6rem; right: 0.7rem;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--bs-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  border-radius: 5px;
+  transition: color 0.18s ease, background 0.18s ease;
+
+  &:hover {
+    color: var(--bs-text-primary);
+    background: var(--bs-green-100);
+  }
 }
 
-.ambient-lighting__top-glow {
-  position: absolute;
-  top: -10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70%;
-  height: 55%;
-  background: radial-gradient(
-    ellipse at 50% 0%,
-    rgba(255, 245, 230, 0.9) 0%,
-    rgba(240, 220, 190, 0.45) 40%,
-    transparent 70%
-  );
+.project-panel__category {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.54rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--bs-text-accent);
+  margin-bottom: 0.3rem;
 }
 
-.ambient-lighting__left-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 30%;
-  height: 100%;
-  background: linear-gradient(to right, rgba(240, 230, 215, 0.35) 0%, transparent 100%);
+.project-panel__title {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: var(--bs-text-primary);
+  margin: 0 0 0.4rem;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
 }
 
-.ambient-lighting__right-fill {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30%;
-  height: 100%;
-  background: linear-gradient(to left, rgba(240, 230, 215, 0.35) 0%, transparent 100%);
+.project-panel__subtitle {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--bs-text-light);
+  margin: 0 0 0.6rem;
+  line-height: 1.6;
 }
 
-.ambient-lighting__vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 90% 80% at 50% 45%,
-    transparent 45%,
-    rgba(220, 205, 185, 0.12) 78%,
-    rgba(200, 185, 165, 0.22) 100%
-  );
+.project-panel__meta {
+  display: flex;
+  gap: 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.56rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bs-text-muted);
 }
 
-.ambient-lighting__shelf-glow {
-  position: absolute;
-  left: 10%;
-  width: 80%;
-  height: 2px;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(255, 245, 230, 0.4) 20%,
-    rgba(255, 250, 240, 0.6) 50%,
-    rgba(255, 245, 230, 0.4) 80%,
-    transparent 100%
-  );
-  filter: blur(3px);
-  pointer-events: none;
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DUST PARTICLES
-// ─────────────────────────────────────────────────────────────────────────────
-.dust-particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  overflow: hidden;
-}
-
-.dust-particle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(220, 195, 155, 0.4);
-  pointer-events: none;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-fill-mode: both;
-}
-
-@keyframes dust-float-a {
-  0%   { transform: translate(0px, 0px) scale(1);    opacity: 0; }
-  15%  { opacity: 1; }
-  50%  { transform: translate(12px, -28px) scale(1.1); }
-  85%  { opacity: 0.8; }
-  100% { transform: translate(-4px, -56px) scale(0.8); opacity: 0; }
-}
-@keyframes dust-float-b {
-  0%   { transform: translate(0px, 0px) scale(0.9); opacity: 0; }
-  20%  { opacity: 0.7; }
-  55%  { transform: translate(-18px, -36px) scale(1.2); }
-  80%  { opacity: 0.5; }
-  100% { transform: translate(8px, -70px) scale(0.7); opacity: 0; }
-}
-@keyframes dust-float-c {
-  0%   { transform: translate(0px, 0px); opacity: 0; }
-  25%  { opacity: 0.6; }
-  60%  { transform: translate(20px, -45px) scale(1.1); }
-  100% { transform: translate(5px, -80px) scale(0.85); opacity: 0; }
-}
-@keyframes dust-float-d {
-  0%   { transform: translate(0px, 0px) scale(1.1); opacity: 0; }
-  18%  { opacity: 0.5; }
-  50%  { transform: translate(-10px, -30px); }
-  100% { transform: translate(12px, -62px) scale(0.75); opacity: 0; }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SHELF SHADOW (component)
-// ─────────────────────────────────────────────────────────────────────────────
-.shelf-shadow {
-  position: relative;
+// ── 16. Section Footer ────────────────────────────────────────────────────────
+.works-section__footer {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 1.1rem clamp(1.5rem, 6vw, 6rem) 3rem;
   width: 100%;
-  overflow: visible;
-  pointer-events: none;
 
-  &__cast {
-    position: absolute;
-    top: 0;
-    left: -5%;
-    width: 110%;
-    height: 60px;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.1) 0%,
-      rgba(0, 0, 0, 0.04) 40%,
-      transparent 100%
-    );
-    filter: blur(4px);
-  }
-
-  &__contact {
-    position: absolute;
-    top: 0;
-    left: 5%;
-    width: 90%;
-    height: 4px;
-    background: rgba(0, 0, 0, 0.15);
-    filter: blur(2px);
-  }
+  @media (max-width: 640px) { padding: 0.9rem 1.25rem 2.5rem; gap: 0.8rem; }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MOBILE ARCHIVE LAYOUT  (< 640px)
-// Premium stacked horizontal-scroll shelf archive.
-// ─────────────────────────────────────────────────────────────────────────────
-@media (max-width: #{$bp-mobile}) {
-
-  // Disable 3D scene framing
-  .bookshelf-scene {
-    overflow-x: hidden;
-  }
-
-  .bookshelf-scene__inner {
-    gap: 0;
-  }
-
-  // Each shelf becomes a horizontal scrollable row
-  .shelf-row {
-    margin-bottom: 0;
-    overflow: hidden;
-
-    // Decorative label for each shelf row
-    position: relative;
-  }
-
-  // Thin warm separator between shelf rows
-  .shelf-row + .shelf-row {
-    &::before {
-      content: "";
-      display: block;
-      height: 1px;
-      background: linear-gradient(
-        to right,
-        transparent 0%,
-        rgba(176, 130, 70, 0.18) 20%,
-        rgba(176, 130, 70, 0.28) 50%,
-        rgba(176, 130, 70, 0.18) 80%,
-        transparent 100%
-      );
-      margin: 0 1.5rem;
-    }
-  }
-
-  // Hide shelf depth elements
-  .shelf-inner-shadow {
-    display: none;
-  }
-  .shelf-shadow-below {
-    display: none;
-  }
-  .shelf-plank {
-    // Show a simplified plank as a decorative bottom border
-    height: 6px;
-    margin-bottom: 0;
-    border-radius: 0;
-
-    &::after {
-      height: 4px;
-    }
-  }
-
-  // Horizontal scroll container of books
-  .shelf-books {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: flex-start;
-    gap: 8px;
-    padding: 2rem 1.5rem 1.25rem;
-    min-height: unset;
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
-  // Books in mobile: reduced scale, no hover 3D — still tactile & premium
-  .book {
-    scroll-snap-align: start;
-    flex-shrink: 0;
-
-    // Scale books down for touch-friendly mobile
-    --book-h: 160px;
-    --book-w: 36px;
-
-    // Disable hover label; use tap-friendly display
-    &:hover .book__label,
-    &:focus .book__label {
-      opacity: 0;
-    }
-
-    // Touch-active state: subtle lift
-    &:active .book__wrapper {
-      transform: translateY(-6px) !important;
-    }
-  }
-
-  // No hover lift animation on mobile — let touch :active handle it
-  .book__wrapper {
-    transform-style: flat !important;
-  }
-
-  // Top surface unnecessary at this scale
-  .book__top {
-    display: none;
-  }
-
-  // Smaller page edge
-  .book__pages {
-    width: 6px;
-    right: -6px;
-  }
-
-  // Simplified floor shadow
-  .book__floor-shadow {
-    height: 4px;
-    opacity: 0.25;
-  }
-
-  // Smaller spine text
-  .book__title-text {
-    font-size: 9px;
-    letter-spacing: 0.12em;
-  }
-
-  .book__year-text {
-    font-size: 7px;
-  }
-
-  .book__text-track {
-    gap: 4px;
-    padding: 0 4px;
-  }
-
-  // Publisher mark still visible at reduced opacity
-  .book__publisher {
-    font-size: 5.5px;
-  }
-
-  // No tooltip labels on mobile
-  .book__label {
-    display: none;
-  }
-
-  // ── Mobile: scroll fade edges ───────────────────────────────────────────
-  // Left and right gradient masks to hint scrollability
-  .shelf-row {
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 3rem;
-      background: linear-gradient(to left, var(--bs-bg) 0%, transparent 100%);
-      pointer-events: none;
-      z-index: 10;
-    }
-  }
-
-  // ── Mobile scene frame elements ─────────────────────────────────────────
-  // SceneTopFrame and SceneBottomRail: keep but scale down
-  .bookshelf-scene__inner > div:first-child {
-    margin: 0 1.5rem;
-  }
-
-  .bookshelf-scene__inner > div:last-child {
-    height: 18px;
-    margin-top: 2px;
-  }
+.works-section__footer-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(45,115,86,0.16), rgba(45,115,86,0.06), transparent);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TABLET REFINEMENTS  (641px – 900px)
-// Shelf remains fully 3D/cinematic; books and spacing scale gracefully.
-// ─────────────────────────────────────────────────────────────────────────────
-@media (min-width: #{$bp-mobile + 1}) and (max-width: #{$bp-tablet}) {
+.works-section__footer-text {
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bs-text-muted);
+  white-space: nowrap;
+}
 
-  .shelf-books {
-    gap: 6px;
-    padding: 0 18px;
-    min-height: 250px;
-    // Allow slight overflow scroll if books are tight, but prefer fit
-    overflow-x: auto;
-    overflow-y: visible;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-    justify-content: flex-start;
-    // Center when books fit comfortably
-    @media (min-width: 768px) {
-      justify-content: center;
-    }
-  }
 
-  // Tablet books: scaled via CSS vars set inline per book, reduced here globally
-  .book {
-    // Override: scale down height/width via CSS var multiplication isn't possible
-    // directly in CSS, so we use a wrapper scale transform on tablet.
-    // Applied via JS className — see Book.jsx tablet prop.
-    // Fallback: font size reductions only
-    .book__title-text {
-      font-size: 9.5px;
-    }
-    .book__year-text {
-      font-size: 7.5px;
-    }
-    .book__publisher {
-      font-size: 6px;
-    }
+// ── 17. Reduced motion ────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .dust-particle,
+  .ambient-lighting__top-glow,
+  .ambient-lighting__shelf-glow,
+  .shelf-plank::before,
+  .bookshelf-cabinet,
+  .works-section__header {
+    animation: none !important;
+    transition: none !important;
   }
-
-  // Bookend: slightly smaller
-  .bookend > div {
-    height: 58px !important;
-    width: 12px !important;
-  }
+  .bookshelf-cabinet { transform: none !important; }
 }

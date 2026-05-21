@@ -2,42 +2,38 @@ import { useMemo } from "react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DustParticles
-// Generates lightweight CSS-animated dust motes floating through the scene.
-// Pure div elements + CSS keyframe animations — no canvas, no libraries.
-// Very low opacity, very slow movement. Cinematic atmosphere only.
+// Lightweight CSS-animated dust motes floating through the cabinet interior.
+// Pure div elements with keyframe animations — no canvas, no WebGL.
+// Seeded pseudo-random values for stable SSR-compatible output (no hydration flash).
+// Skipped on mobile for performance.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ANIMATION_NAMES = [
-  "dust-float-a",
-  "dust-float-b",
-  "dust-float-c",
-  "dust-float-d",
-];
+const ANIM_NAMES = ["dust-float-a", "dust-float-b", "dust-float-c", "dust-float-d"];
 
-// Seeded pseudo-random for stable SSR-compatible values
-function seededRandom(seed) {
+// Seeded pseudo-random — deterministic across renders
+function seeded(seed) {
   const x = Math.sin(seed + 1) * 10000;
   return x - Math.floor(x);
 }
 
 function buildParticles(count) {
   return Array.from({ length: count }, (_, i) => {
-    const r = (offset) => seededRandom(i * 17 + offset);
-
-    const size    = r(0) * 1.6 + 0.6;          // 0.6–2.2px
-    const opacity = r(1) * 0.18 + 0.06;         // 0.06–0.24
-    const left    = r(2) * 90 + 5;              // 5–95%
-    const top     = r(3) * 85 + 8;              // 8–93%
-    const delay   = r(4) * -24;                 // stagger starts
-    const dur     = r(5) * 14 + 18;             // 18–32s
-    const anim    = ANIMATION_NAMES[Math.floor(r(6) * ANIMATION_NAMES.length)];
-    const blur    = r(7) > 0.7 ? "0.4px" : "0"; // occasional soft blur
-
-    return { id: i, size, opacity, left, top, delay, dur, anim, blur };
+    const r = (offset) => seeded(i * 19 + offset);
+    return {
+      id:      i,
+      size:    r(0) * 1.8 + 0.5,                              // 0.5–2.3px
+      opacity: r(1) * 0.18 + 0.05,                            // 0.05–0.23
+      left:    r(2) * 88 + 6,                                  // 6–94%
+      top:     r(3) * 82 + 8,                                  // 8–90%
+      delay:   r(4) * -28,                                     // stagger start
+      dur:     r(5) * 14 + 18,                                 // 18–32s
+      anim:    ANIM_NAMES[Math.floor(r(6) * ANIM_NAMES.length)],
+      blur:    r(7) > 0.68 ? "0.4px" : "0",
+    };
   });
 }
 
-function DustParticles({ count = 22 }) {
+function DustParticles({ count = 18 }) {
   const particles = useMemo(() => buildParticles(count), [count]);
 
   return (
@@ -47,15 +43,15 @@ function DustParticles({ count = 22 }) {
           key={p.id}
           className="dust-particle"
           style={{
-            width:           `${p.size}px`,
-            height:          `${p.size}px`,
-            left:            `${p.left}%`,
-            top:             `${p.top}%`,
-            opacity:         p.opacity,
-            filter:          p.blur ? `blur(${p.blur})` : undefined,
-            animationName:   p.anim,
+            width:             `${p.size}px`,
+            height:            `${p.size}px`,
+            left:              `${p.left}%`,
+            top:               `${p.top}%`,
+            opacity:           p.opacity,
+            filter:            p.blur ? `blur(${p.blur})` : undefined,
+            animationName:     p.anim,
             animationDuration: `${p.dur}s`,
-            animationDelay:  `${p.delay}s`,
+            animationDelay:    `${p.delay}s`,
           }}
         />
       ))}
