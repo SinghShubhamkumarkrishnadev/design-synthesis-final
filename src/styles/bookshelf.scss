@@ -2817,3 +2817,232 @@ background-image:
   align-items: center;
   justify-content: center;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// bookshelf.scss — UX Fix Patch
+//
+// APPEND THIS ENTIRE BLOCK to the bottom of your existing bookshelf.scss.
+// Do NOT replace any existing rules — these are additive overrides only.
+//
+// Fixes applied:
+//   1. Overlay pointer-events — makes the overlay clickable for backdrop-close
+//   2. Left-page image rendering — ensures cover image fills the left page
+//   3. Portal rendering — ensures body-level fixed elements are z-index correct
+//   4. Mobile close accessibility — slightly larger close button tap area
+// ═══════════════════════════════════════════════════════════════════════════════
+
+
+// ── Fix #1 — Overlay pointer-events ──────────────────────────────────────────
+//
+// The original .book-experience had pointer-events:none (set as a general
+// rule so only children handle interaction). With the backdrop-click pattern,
+// the overlay ITSELF must be clickable — pointer-events:auto is now set inline
+// in BookExperience.jsx, but we also override here for safety.
+//
+// The stage (inner book container) retains pointer-events:auto naturally
+// since it has no pointer-events:none rule. stopPropagation on the stage
+// prevents click events from reaching the overlay.
+//
+// We remove the blanket pointer-events:none from the overlay here so that
+// clicking the dark area outside the book correctly fires handleClose().
+
+.book-experience {
+  // Override the original pointer-events:none
+  // The overlay must be clickable for backdrop-close to work.
+  pointer-events: auto;
+  cursor: default; // Neutral cursor on the overlay backdrop area
+}
+
+// The stage itself (book container) does not need cursor:pointer —
+// it stops propagation so overlay click never fires when clicking inside.
+.book-experience__stage {
+  pointer-events: auto;
+  cursor: default;
+}
+
+// Open wrapper also needs auto so the book is interactive
+.book-experience__open-wrapper {
+  pointer-events: auto;
+}
+
+// Floor div should also not block clicks — it uses stopPropagation
+// but we ensure it doesn't eat backdrop clicks incorrectly
+.book-experience__floor {
+  pointer-events: none; // Floor is purely visual — overlay handles clicks below
+}
+
+
+// ── Fix #2 — Left page image rendering ───────────────────────────────────────
+//
+// The left page image was not rendering correctly on desktop because:
+//   · .open-book__pages-left had no explicit position:relative, so
+//     the absolute-positioned .open-book__cover-image had no containing block
+//   · The image div itself needs explicit width/height to fill the container
+//
+// These rules reinforce correct positioning.
+
+.open-book__pages-left {
+  // Ensure this is the containing block for absolutely-positioned children
+  position: relative;
+  overflow: hidden;
+
+  // Ensure the page-paper fills the full left page container
+  .open-book__page-paper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Cover image — must be absolutely positioned within .open-book__page-paper
+// which is itself absolutely positioned within .open-book__pages-left
+.open-book__cover-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  z-index: 0;
+
+  // Fallback background color if image fails to load
+  background-color: var(--ob-paper-dark, #E8E0D0);
+
+  // Ensure the vignette overlay renders above the image
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top,  rgba(20, 16, 12, 0.42) 0%, transparent 50%),
+      linear-gradient(to right, transparent 65%, rgba(20, 16, 12, 0.22) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  // Placeholder state when no image is provided
+  &--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      145deg,
+      rgba(42, 36, 32, 0.08),
+      rgba(196, 149, 106, 0.18)
+    );
+  }
+}
+
+// Left caption must render above the image vignette
+.open-book__left-caption {
+  z-index: 5; // Above vignette (::after z-index: 1) and grain (z-index: 2)
+}
+
+// Paper grain must render above image
+.open-book__paper-grain {
+  z-index: 3;
+}
+
+// Page-paper ::before (warm highlight) must be above image but below grain
+.open-book__page-paper::before {
+  z-index: 2;
+}
+
+// Mobile left page — same positioning fix
+.open-book--mobile .open-book__pages-left {
+  position: relative;
+
+  .open-book__page-paper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+
+// ── Fix #3 — Portal z-index guarantee ────────────────────────────────────────
+//
+// When rendered via React Portal into document.body, the backdrop and overlay
+// are no longer nested inside WorksSection's stacking context. However, other
+// portals (modals, tooltips) on the page might conflict. We use a very high
+// z-index to ensure the book experience always floats above everything.
+//
+// Existing z-index values (200/201) should be sufficient, but we reinforce
+// position:fixed explicitly here to guarantee viewport-level positioning.
+
+.book-experience__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000; // High enough to beat any page content
+
+  // Ensure the backdrop is NOT clickable — the overlay div handles clicks.
+  // The backdrop is purely visual.
+  pointer-events: none;
+}
+
+.book-experience {
+  position: fixed;
+  inset: 0;
+  z-index: 9001; // One above backdrop
+}
+
+.book-experience__close {
+  position: fixed;
+  z-index: 9010; // Above everything — always reachable
+}
+
+// Stage when open: truly fullscreen fixed layer
+.book-experience--open .book-experience__stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9002;
+}
+
+// Floor visual element — fixed at bottom of viewport
+.book-experience__floor {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9003;
+}
+
+
+// ── Fix #4 — Mobile close button tap area ────────────────────────────────────
+//
+// On mobile the close button can be hard to tap. Increase tap area via
+// padding without changing the visual size.
+
+@media (max-width: 640px) {
+  .book-experience__close {
+    // Larger invisible tap target using padding trick
+    padding: 12px;
+    width: 44px;
+    height: 44px;
+    top: 0.75rem;
+    right: 0.75rem;
+    // Ensure it's always on top even on small screens
+    z-index: 9010;
+  }
+}
+
+
+// ── Fix #5 — Prevent body scroll bleed-through ───────────────────────────────
+//
+// When the overlay is open, ensure body content cannot be seen scrolling
+// behind it on browsers that don't respect overflow:hidden on <html> alone.
+
+body:has([data-scroll-locked]) {
+  overflow: hidden;
+}
+
+// Fallback for browsers without :has() support — JS adds this class
+body.scroll-locked {
+  overflow: hidden;
+}

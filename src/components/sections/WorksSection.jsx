@@ -5,14 +5,14 @@ import BookExperience from "../bookshelf/BookExperience";
 import "../../styles/bookshelf.scss";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// WorksSection — Phase 1 Update
+// WorksSection — Phase 1 Update + UX Fixes
 //
-// Changes from original:
-//  · Removed ProjectPanel import and usage
-//  · Added BookExperience import
-//  · Passes selectedProject into BookshelfScene so books can show ghost state
-//  · AnimatePresence wraps BookExperience for entry/exit
-//  · All existing layout, header, footer, info cards preserved
+// Changes from Phase 1:
+//  · BookExperience now uses React Portal internally (renders into document.body)
+//    so the AnimatePresence here only controls whether the component is mounted;
+//    the actual DOM output appears at body level, not inside this section.
+//  · This means overflow:hidden on .works-section no longer clips the overlay.
+//  · All existing layout, header, footer, info cards preserved unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const ease = [0.25, 0.1, 0.25, 1];
@@ -101,10 +101,6 @@ export default function WorksSection() {
       {/* ── Body: shelf left + info right ───────────────────────────── */}
       <div className="works-section__body">
         <div className="works-section__shelf-col">
-          {/*
-            Pass selectedProject down so BookshelfScene → Shelf → Book
-            can receive isSelected prop and show the ghost/extraction state.
-          */}
           <BookshelfScene
             onBookSelect={handleBookSelect}
             selectedProject={selectedProject}
@@ -127,7 +123,12 @@ export default function WorksSection() {
         <div className="works-section__footer-line" />
       </footer>
 
-      {/* ── Book Experience — cinematic fullscreen extraction ─────────── */}
+      {/* ── Book Experience ───────────────────────────────────────────────
+          BookExperience uses React Portal internally — its DOM output goes
+          into document.body, NOT inside this section. The AnimatePresence
+          here controls component mounting/unmounting only. The overlay is
+          therefore never clipped by .works-section's overflow:hidden.
+      ────────────────────────────────────────────────────────────────── */}
       <AnimatePresence mode="wait">
         {selectedProject && (
           <BookExperience

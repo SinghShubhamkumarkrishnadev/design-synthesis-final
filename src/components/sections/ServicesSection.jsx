@@ -22,14 +22,14 @@ const TOKEN = {
    DATA
 ========================= */
 const sectors = [
-  { id: "res", imageSrc: "/resident.png",      alt: "Residential"        },
-  { id: "com", imageSrc: "/commercial.png",    alt: "Commercial & Corporate" },
-  { id: "hea", imageSrc: "/healthcare.png",    alt: "Healthcare"         },
-  { id: "ins", imageSrc: "/institutional.png", alt: "Institutional"      },
-  { id: "hos", imageSrc: "/hospitality.png",   alt: "Hospitality & Leisure" },
-  { id: "int", imageSrc: "/interior.png",      alt: "Interior Design"    },
-  { id: "lan", imageSrc: "/landscape.png",     alt: "Landscape"          },
-  { id: "spo", imageSrc: "/sports.png",        alt: "Sports & Recreation"},
+  { id: "res", imageSrc: "/resident.webp",      alt: "Residential"        },
+  { id: "com", imageSrc: "/commercial.webp",    alt: "Commercial & Corporate" },
+  { id: "hea", imageSrc: "/healthcare.webp",    alt: "Healthcare"         },
+  { id: "ins", imageSrc: "/institutional.webp", alt: "Institutional"      },
+  { id: "hos", imageSrc: "/hospitality.webp",   alt: "Hospitality & Leisure" },
+  { id: "int", imageSrc: "/interior.webp",      alt: "Interior Design"    },
+  { id: "lan", imageSrc: "/landscape.webp",     alt: "Landscape"          },
+  { id: "spo", imageSrc: "/sports.webp",        alt: "Sports & Recreation"},
 ];
 
 /* =========================

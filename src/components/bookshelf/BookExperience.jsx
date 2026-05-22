@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import OpenBook from "./OpenBook";
 
@@ -8,22 +9,27 @@ import OpenBook from "./OpenBook";
 // Fix #1 — Backdrop-click close:
 //   The outer overlay div handles onClick → handleClose().
 //   The inner book container calls e.stopPropagation() so clicks inside
-//   never bubble up to the overlay. Correct, minimal, mobile-safe.
+//   never bubble up to the overlay. The overlay itself has pointer-events: auto
+//   so it is always clickable.
 //
-// Fix #2 — Scroll jump eliminated:
-//   Root cause: the previous implementation used `position: fixed` on body
-//   combined with `top: -${scrollY}px`. When fixed is removed on cleanup,
-//   the browser reflows the document to scrollTop=0 for one frame, then
-//   window.scrollTo() fires — causing a visible jump/flicker.
+// Fix #2 — Clipping by WorksSection (MOST IMPORTANT):
+//   Root cause: WorksSection has overflow:hidden AND contains transformed
+//   children (bookshelf-cabinet uses perspective/transform), which creates
+//   a new stacking context. Any child with position:fixed inside a transformed
+//   ancestor is positioned relative to that ancestor, NOT the viewport.
+//   Fix: React Portal (createPortal) renders the backdrop + overlay directly
+//   into document.body, completely escaping the WorksSection subtree.
+//   This guarantees truly fullscreen, unclipped overlay at all times.
 //
-//   Fix: instead of position:fixed, lock scroll using only `overflow: hidden`
-//   on <html> + `margin-right: ${scrollbarWidth}px` compensation (prevents
-//   layout shift from scrollbar disappearing). The document's native scrollTop
-//   is untouched throughout, so there is zero reflow on unlock.
+// Fix #3 — Scroll lock (no jump):
+//   Uses overflow:hidden on <html> + scrollbar-width compensation only.
+//   The document's native scrollTop is never disturbed. No window.scrollTo().
 //
-//   Lenis coordination: Lenis is paused while the overlay is open (it reads
-//   a data attribute we set on <html>), resumed on close. We never call
-//   window.scrollTo() anywhere.
+// Fix #4 — Desktop image:
+//   The left-page image container is given explicit position:relative so
+//   the absolute-positioned cover-image fills it correctly. The image div
+//   itself gets position:absolute inset:0 with object-fit:cover semantics
+//   via background-size:cover background-position:center.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const ease = [0.32, 0.08, 0.16, 1.0];
@@ -91,26 +97,19 @@ export default function BookExperience({ project, onClose }) {
   const [isClosing, setIsClosing] = useState(false);
 
   // ── Scroll lock — NO position:fixed, NO scrollTo() ──────────────────────
-  // We lock by adding overflow:hidden to <html> only.
-  // The document's scrollTop stays exactly where it is at all times.
-  // A padding-right equal to the scrollbar width prevents layout shift.
   useEffect(() => {
     if (!project) return;
 
     const html = document.documentElement;
     const sbWidth = getScrollbarWidth();
 
-    // Save existing inline values (may already have some)
     const prevOverflow      = html.style.overflow;
     const prevPaddingRight  = html.style.paddingRight;
 
     html.style.overflow     = "hidden";
-    // Only add compensation if a scrollbar was visible
     if (sbWidth > 0) {
       html.style.paddingRight = `${sbWidth}px`;
     }
-
-    // Signal Lenis (if present) to pause
     html.setAttribute("data-scroll-locked", "1");
 
     return () => {
@@ -158,14 +157,15 @@ export default function BookExperience({ project, onClose }) {
     onClose?.();
   }, [onClose]);
 
-  // ── Backdrop / overlay click — Fix #1 ───────────────────────────────────
-  // The overlay div itself is the click target for "outside book" clicks.
-  // The book container stops propagation so clicks inside never reach here.
+  // ── Overlay click — Fix #1 ───────────────────────────────────────────────
+  // The overlay div covers the entire viewport. Clicking anywhere on it
+  // (i.e., outside the book stage) fires handleClose.
+  // The book stage calls stopPropagation so inner clicks never reach here.
   const handleOverlayClick = useCallback(() => {
     if (!isClosing) handleClose();
   }, [isClosing, handleClose]);
 
-  // Prevent clicks inside the book from bubbling to the overlay
+  // Prevent clicks inside the book stage from bubbling to the overlay
   const stopPropagation = useCallback((e) => {
     e.stopPropagation();
   }, []);
@@ -192,128 +192,144 @@ export default function BookExperience({ project, onClose }) {
     "--book-w":        "var(--extracted-book-w, 72px)",
   };
 
-  return (
-    <>
-      {/* ── Cinematic Backdrop (purely visual — no click handler needed) ── */}
-      <motion.div
-        key={`backdrop-${project.id}`}
-        className="book-experience__backdrop"
-        variants={backdropVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        aria-hidden="true"
-      />
-
-      {/* ── Overlay — FULL SCREEN click target ───────────────────────────
-          This div covers the entire screen. Clicking anywhere on it
-          (i.e., outside the book) fires handleOverlayClick → close.
-          The book container below calls stopPropagation so inner clicks
-          never reach this handler.
-      ──────────────────────────────────────────────────────────────────── */}
-      <motion.div
-        key={`experience-${project.id}`}
-        className={`book-experience${bookOpen ? " book-experience--open" : ""}`}
-        variants={experienceVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Project: ${title}`}
-        onClick={handleOverlayClick}
-      >
-        {/* ── Close Button ─────────────────────────────────────────────── */}
-        <motion.button
-          className="book-experience__close"
-          variants={closeVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          onClick={handleClose}
-          aria-label="Close project view"
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.94 }}
-        >
-          <CloseIcon />
-        </motion.button>
-
-        {/* ── Stage — stopPropagation prevents accidental close ────────── */}
-        <div
-          className={`book-experience__stage${bookOpen ? " book-experience__stage--open" : ""}`}
-          onClick={stopPropagation}
-        >
-          {/* ── Closed Book (shared layout target — Phase 1) ────────────
-              Kept in DOM (invisible when open) so layoutId can animate
-              back to the shelf on close.
-          ─────────────────────────────────────────────────────────────── */}
+  // ── Portal content — renders into document.body ─────────────────────────
+  // Fix #2: By portaling into document.body we completely escape
+  // WorksSection's overflow:hidden and any transformed ancestors.
+  // position:fixed on the portal children is now relative to the true
+  // viewport, guaranteeing fullscreen coverage with no clipping.
+  const portalContent = (
+    <AnimatePresence mode="wait">
+      {project && (
+        <>
+          {/* ── Cinematic Backdrop ─────────────────────────────────────── */}
           <motion.div
-            layoutId={`book-${project.id}`}
-            className="book-experience__extracted"
-            style={{
-              ...closedBookVars,
-              position:      bookOpen ? "absolute" : "relative",
-              opacity:       bookOpen ? 0 : 1,
-              pointerEvents: "none",
-              zIndex:        bookOpen ? -1 : 0,
-            }}
-            layout
-            transition={{ layout: { duration: 0.72, ease } }}
-          >
-            <motion.div
-              className="book-experience__glow-ring"
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={bookOpen ? { opacity: 0 } : { opacity: 1, scale: 1 }}
-              transition={{ duration: 0.40, ease }}
-              aria-hidden="true"
-            />
+            key={`backdrop-${project.id}`}
+            className="book-experience__backdrop"
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            aria-hidden="true"
+          />
 
-            <div className="book-experience__spine" aria-hidden="true">
-              <div className="book-experience__binding book-experience__binding--top" />
-              <div className="book-experience__binding book-experience__binding--bottom" />
-              <div className="book-experience__grain" />
-              <div className="book-experience__text-track">
-                <span className="book-experience__title-text">{title}</span>
-                <span className="book-experience__divider" />
-                <span className="book-experience__year-text">{year}</span>
-              </div>
-              <div className="book-experience__publisher" aria-hidden="true">
-                Design Synthesis
-              </div>
-              <div className="book-experience__sheen" aria-hidden="true" />
+          {/* ── Overlay — fullscreen click target ────────────────────────
+              pointer-events: auto so overlay is always clickable.
+              Clicking anywhere on the overlay (outside the stage) closes.
+              The stage calls stopPropagation to prevent accidental close.
+          ──────────────────────────────────────────────────────────────── */}
+          <motion.div
+            key={`experience-${project.id}`}
+            className={`book-experience${bookOpen ? " book-experience--open" : ""}`}
+            style={{ pointerEvents: "auto" }}
+            variants={experienceVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Project: ${title}`}
+            onClick={handleOverlayClick}
+          >
+            {/* ── Close Button ───────────────────────────────────────────── */}
+            <motion.button
+              className="book-experience__close"
+              variants={closeVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={(e) => { e.stopPropagation(); handleClose(); }}
+              aria-label="Close project view"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.94 }}
+            >
+              <CloseIcon />
+            </motion.button>
+
+            {/* ── Stage — stopPropagation prevents overlay close ───────── */}
+            <div
+              className={`book-experience__stage${bookOpen ? " book-experience__stage--open" : ""}`}
+              onClick={stopPropagation}
+            >
+              {/* ── Closed Book (shared layout target) ─────────────────────
+                  Kept in DOM (invisible when open) so layoutId can animate
+                  back to the shelf on close.
+              ──────────────────────────────────────────────────────────── */}
+              <motion.div
+                layoutId={`book-${project.id}`}
+                className="book-experience__extracted"
+                style={{
+                  ...closedBookVars,
+                  position:      bookOpen ? "absolute" : "relative",
+                  opacity:       bookOpen ? 0 : 1,
+                  pointerEvents: "none",
+                  zIndex:        bookOpen ? -1 : 0,
+                }}
+                layout
+                transition={{ layout: { duration: 0.72, ease } }}
+              >
+                <motion.div
+                  className="book-experience__glow-ring"
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={bookOpen ? { opacity: 0 } : { opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.40, ease }}
+                  aria-hidden="true"
+                />
+
+                <div className="book-experience__spine" aria-hidden="true">
+                  <div className="book-experience__binding book-experience__binding--top" />
+                  <div className="book-experience__binding book-experience__binding--bottom" />
+                  <div className="book-experience__grain" />
+                  <div className="book-experience__text-track">
+                    <span className="book-experience__title-text">{title}</span>
+                    <span className="book-experience__divider" />
+                    <span className="book-experience__year-text">{year}</span>
+                  </div>
+                  <div className="book-experience__publisher" aria-hidden="true">
+                    Design Synthesis
+                  </div>
+                  <div className="book-experience__sheen" aria-hidden="true" />
+                </div>
+
+                <div className="book-experience__pages" aria-hidden="true" />
+                <div className="book-experience__extraction-shadow" aria-hidden="true" />
+              </motion.div>
+
+              {/* ── OpenBook — mounts after extraction settles ─────────── */}
+              <AnimatePresence>
+                {bookOpen && (
+                  <motion.div
+                    key="open-book-wrapper"
+                    className="book-experience__open-wrapper"
+                    variants={openBookVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
+                    <OpenBook
+                      project={project}
+                      onReverseComplete={handleReverseComplete}
+                      isMobile={isMobile}
+                      innerRef={(node) => { openBookRef.current = node; }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            <div className="book-experience__pages" aria-hidden="true" />
-            <div className="book-experience__extraction-shadow" aria-hidden="true" />
+            {/* ── Floor reflection ─────────────────────────────────────── */}
+            <div
+              className="book-experience__floor"
+              aria-hidden="true"
+              onClick={stopPropagation}
+            />
           </motion.div>
-
-          {/* ── OpenBook — mounts after extraction settles ─────────────── */}
-          <AnimatePresence>
-            {bookOpen && (
-              <motion.div
-                key="open-book-wrapper"
-                className="book-experience__open-wrapper"
-                variants={openBookVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                <OpenBook
-                  project={project}
-                  onReverseComplete={handleReverseComplete}
-                  isMobile={isMobile}
-                  innerRef={(node) => { openBookRef.current = node; }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* ── Floor reflection ─────────────────────────────────────────── */}
-        <div className="book-experience__floor" aria-hidden="true" onClick={stopPropagation} />
-      </motion.div>
-    </>
+        </>
+      )}
+    </AnimatePresence>
   );
+
+  // Portal into document.body — escapes WorksSection's stacking context
+  return createPortal(portalContent, document.body);
 }
 
 // ── Close Icon ────────────────────────────────────────────────────────────────
