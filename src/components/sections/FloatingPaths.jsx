@@ -26,7 +26,8 @@ const FloatingPaths = memo(function FloatingPaths({ position }) {
 
         return {
           id:    i,
-          d:     `M${sx} ${sy1}C${sx} ${sy1} ${VIEWBOX_W - (312 - i * 5 * position)} ${cy1} ${mx} ${343 - i * 6}C${ex} ${cy2} ${ex} ${cy3} ${ex} ${cy3}`,
+          // Fixed string layout with proper SVG commas to support Framer Motion layout transformations
+          d:     `M ${sx},${sy1} C ${sx},${sy1} ${VIEWBOX_W - (312 - i * 5 * position)},${cy1} ${mx},${343 - i * 6} C ${ex},${cy2} ${ex},${cy3} ${ex},${cy3}`,
           width: 0.6 + i * 0.03,
         };
       }),
@@ -44,7 +45,7 @@ const FloatingPaths = memo(function FloatingPaths({ position }) {
         {paths.map((path) => (
           <motion.path
             key={path.id}
-            d={path.d}
+            d={path.d ?? "M 0,0 Z"}
             stroke="currentColor"
             strokeWidth={path.width}
             strokeOpacity={0.08 + path.id * 0.006}

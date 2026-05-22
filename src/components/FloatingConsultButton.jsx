@@ -11,7 +11,6 @@ const FloatingConsultButton = ({
   popupBadgeText = "Free",
   ctaButtonText = "Book a call",
   ctaButtonAction = () => {
-    // Graceful direct-dial protocol connection
     window.location.href = "tel:+919924774664";
   },
   position = { bottom: "1.25rem", left: "1.25rem" },
@@ -20,7 +19,6 @@ const FloatingConsultButton = ({
 
   return (
     <>
-      {/* Backdrop */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -33,7 +31,6 @@ const FloatingConsultButton = ({
         )}
       </AnimatePresence>
 
-      {/* Popup Modal */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -47,7 +44,6 @@ const FloatingConsultButton = ({
               left: "1.25rem",
             }}
           >
-            {/* Close Button */}
             <button
               onClick={() => setIsOpen(false)}
               className="absolute -top-12 left-0 text-white hover:text-gray-300 transition-colors cursor-pointer"
@@ -67,7 +63,6 @@ const FloatingConsultButton = ({
             </button>
 
             <div className="space-y-4 sm:space-y-6">
-              {/* Header */}
               <div className="flex items-start justify-between gap-4">
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black leading-tight">
                   {popupHeading}
@@ -77,12 +72,10 @@ const FloatingConsultButton = ({
                 </span>
               </div>
 
-              {/* Description */}
               <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">
                 {popupDescription}
               </p>
 
-              {/* CTA Button linked directly to tel link */}
               <button
                 className="w-full bg-neutral-900 hover:bg-emerald-800 active:scale-95 text-white px-6 py-3.5 sm:px-8 sm:py-4 rounded-full font-medium text-sm sm:text-base transition-all duration-200 cursor-pointer shadow-md hover:shadow-emerald-900/20"
                 onClick={() => {
@@ -97,7 +90,6 @@ const FloatingConsultButton = ({
         )}
       </AnimatePresence>
 
-      {/* ── Floating Button ── */}
       <div className="fixed z-50" style={position}>
         <motion.button
           className="relative flex items-center justify-center
@@ -111,7 +103,6 @@ const FloatingConsultButton = ({
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Open consultation booking"
         >
-          {/* ── Revolving text ring ── */}
           <motion.div
             className="absolute inset-0"
             animate={{ rotate: 360 }}
@@ -143,7 +134,6 @@ const FloatingConsultButton = ({
             </svg>
           </motion.div>
 
-          {/* ── Icon ── */}
           <PhoneCall
             className="relative z-10 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 transform group-hover:scale-110 group-hover:text-emerald-700 transition-all duration-300"
             strokeWidth={1.75}

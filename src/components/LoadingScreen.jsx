@@ -44,6 +44,7 @@ export default function LoadingScreen({ onComplete }) {
   
   const [pointsString, setPointsString] = useState("");
 
+  // 1. Calculate dimensions layout and setup point paths safely on frame load
   useEffect(() => {
     if (typeof window === "undefined") return;
     const container = containerRef.current;
@@ -74,6 +75,15 @@ export default function LoadingScreen({ onComplete }) {
     handleResize();
     window.addEventListener("resize", handleResize);
 
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 2. Fire animation timeline setup ONLY when pointsString calculations exist in DOM
+  useEffect(() => {
+    if (!pointsString) return;
+    const container = containerRef.current;
+    if (!container) return;
+
     const ballSize = parseFloat(container.style.getPropertyValue("--ball-size")) || 60;
     const gap = parseFloat(container.style.getPropertyValue("--gap")) || 12;
     const totalGridSize = 3 * ballSize + 2 * gap;
@@ -88,10 +98,14 @@ export default function LoadingScreen({ onComplete }) {
     });
 
     const ctx = gsap.context(() => {
-      gsap.set(singleBallRef.current, { x: 0, y: 0, scale: 0, opacity: 0 });
+      gsap.set(containerRef.current, { yPercent: 0, opacity: 1 });
+      gsap.set(singleBallRef.current, { x: 0, y: 0, scale: 0, opacity: 0, display: "block" });
       gsap.set(gridRef.current, { opacity: 0 });
       gsap.set(textRef.current, { opacity: 0, y: 20 });
-      ballRefs.current.forEach((b) => gsap.set(b, { scale: 0, opacity: 0 }));
+      
+      ballRefs.current.forEach((b) => {
+        if (b) gsap.set(b, { scale: 0, opacity: 0, x: 0, y: 0 });
+      });
 
       if (pathRef.current) {
         const pathLength = pathRef.current.getTotalLength();
@@ -185,28 +199,27 @@ export default function LoadingScreen({ onComplete }) {
         stagger: { amount: 0.1 },
       });
 
-      tl.to(pathRef.current, {
-        strokeDashoffset: 0,
-        duration: 1.2,
-        ease: "power2.out",
-      }, "-=0.2");
+      if (pathRef.current) {
+        tl.to(pathRef.current, {
+          strokeDashoffset: 0,
+          duration: 1.2,
+          ease: "power2.out",
+        }, "-=0.2");
+      }
 
       tl.to(textRef.current, { opacity: 1, y: 0, duration: 0.75, ease: "power3.out" }, "-=0.5");
       
       tl.to(containerRef.current, {
-        opacity: 0,
-        duration: 1.8,
-        ease: "power2.inOut",
+        yPercent: -100,
+        duration: 1.4,
+        ease: "power4.inOut",
         onComplete: onComplete,
-      }, "+=0.1");
+      }, "+=0.3");
 
     }, container);
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      ctx.revert();
-    };
-  }, [onComplete, pointsString]);
+    return () => ctx.revert();
+  }, [pointsString, onComplete]);
 
   const renderGlassBall = (type) => {
     const s = BALL_STYLES[type];
@@ -334,7 +347,7 @@ export default function LoadingScreen({ onComplete }) {
         padding: "1rem",
         overflow: "hidden",
         background: "#d2d6db",
-        willChange: "opacity"
+        willChange: "transform"
       }}
     >
       <div
