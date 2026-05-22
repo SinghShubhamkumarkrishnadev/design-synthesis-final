@@ -1320,3 +1320,1500 @@ background-image:
   }
   .bookshelf-cabinet { transform: none !important; }
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// bookshelf.scss — PHASE 1 ADDITIONS
+// Append these rules to the END of your existing bookshelf.scss
+//
+// Covers:
+//  · Cinematic backdrop
+//  · Fullscreen extraction overlay
+//  · Extracted closed book (enlarged, centered)
+//  · Project meta panel beside the book
+//  · Extraction shadow & glow ring
+//  · Responsive breakpoints
+//  · Selected ("ghost") state on shelf book
+//  · Reduced motion support additions
+// ═══════════════════════════════════════════════════════════════════════════════
+
+
+// ── Additional Phase 1 tokens ─────────────────────────────────────────────────
+:root {
+  // Extracted book dimensions — responsive via CSS custom props
+  --extracted-book-h:  380px;
+  --extracted-book-w:  72px;
+
+  // Backdrop
+  --backdrop-color:    rgba(8, 22, 14, 0.82);
+  --backdrop-blur:     0px;   // We purposely avoid blur on backdrop for performance
+
+  // Extraction glow
+  --extraction-glow:   rgba(100, 200, 140, 0.18);
+}
+
+
+// ── 18. Book selected / ghost state on shelf ──────────────────────────────────
+// When a book is extracted, its shelf copy becomes a ghost placeholder
+.book--selected {
+  pointer-events: none;
+
+  .book__label {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
+  // The spine opacity is controlled by Framer Motion inline,
+  // but we can reinforce with a CSS transition for non-JS cases
+  .book__wrapper {
+    transition: opacity 0.45s ease;
+  }
+}
+
+
+// ── 19. Cinematic Backdrop ────────────────────────────────────────────────────
+// Sits behind the overlay, above the page content
+.book-experience__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+
+  // Rich dark film — preserves bookshelf silhouette visibility
+  background:
+    // Vignette from edges
+    radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      rgba(8, 22, 14, 0.68) 0%,
+      rgba(8, 22, 14, 0.88) 60%,
+      rgba(4, 12, 8, 0.94) 100%
+    );
+
+  // No heavy blur — GPU friendly
+  cursor: pointer;
+
+  // Grain overlay using noise SVG data URI — matches existing cabinet style
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    pointer-events: none;
+    will-change: auto;
+  }
+}
+
+
+// ── 20. Book Experience Container ─────────────────────────────────────────────
+// Full viewport, centered flex layout
+.book-experience {
+  position: fixed;
+  inset: 0;
+  z-index: 201;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; // children handle their own pointer events
+
+  // Prevent accidental text selection during extraction motion
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+
+// ── 21. Close Button ─────────────────────────────────────────────────────────
+.book-experience__close {
+  position: fixed;
+  top: clamp(1.25rem, 3vw, 2rem);
+  right: clamp(1.25rem, 3vw, 2rem);
+  z-index: 210;
+  pointer-events: auto;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(100, 200, 140, 0.20);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.70);
+
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease;
+
+  &:hover {
+    background: rgba(100, 200, 140, 0.14);
+    border-color: rgba(100, 200, 140, 0.40);
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(100, 200, 140, 0.60);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 640px) {
+    width: 40px;
+    height: 40px;
+    top: 1rem;
+    right: 1rem;
+  }
+}
+
+
+// ── 22. Extraction Stage ──────────────────────────────────────────────────────
+// Flex row: book spine | meta panel
+.book-experience__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2rem, 4vw, 5rem);
+  pointer-events: auto;
+  position: relative;
+
+  // Subtle upward offset from true center — feels more editorial
+  transform: translateY(-2vh);
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    gap: 2rem;
+    transform: translateY(0);
+    padding: 0 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    gap: 1.5rem;
+    padding: 0 1rem;
+    // On mobile, keep book centered, meta below
+    align-items: center;
+  }
+}
+
+
+// ── 23. Extracted Book Wrapper ────────────────────────────────────────────────
+// This is the shared-layout target that receives the book from the shelf
+.book-experience__extracted {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+
+  // Drop shadow — dramatic extraction lighting
+  filter:
+    drop-shadow(0 32px 64px rgba(0, 0, 0, 0.60))
+    drop-shadow(0 8px 20px rgba(0, 0, 0, 0.40));
+
+  // GPU hint
+  will-change: transform;
+
+  @media (max-width: 900px) {
+    --extracted-book-h: 300px;
+    --extracted-book-w: 58px;
+  }
+  @media (max-width: 640px) {
+    --extracted-book-h: 240px;
+    --extracted-book-w: 46px;
+  }
+}
+
+
+// ── 24. Extracted Spine ───────────────────────────────────────────────────────
+// Mirrors book__spine structure at extraction scale.
+// Framer Motion's layoutId animates the spine from shelf → here.
+.book-experience__spine {
+  width: var(--extracted-book-w, 72px);
+  height: var(--extracted-book-h, 380px);
+  background: var(--book-gradient, var(--book-color, #2D7356));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.32);
+
+  // Main highlight sheen — rendered via .book-experience__sheen child
+}
+
+.book-experience__binding {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.16);
+
+  &--top {
+    top: 14px;
+    height: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.20);
+  }
+  &--bottom {
+    bottom: 14px;
+    height: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.26);
+  }
+}
+
+.book-experience__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 4px,
+    rgba(0, 0, 0, 0.016) 4px,
+    rgba(0, 0, 0, 0.016) 5px
+  );
+  pointer-events: none;
+}
+
+.book-experience__sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+// Vertical text track — same structure as book__text-track, scaled up
+.book-experience__text-track {
+  position: absolute;
+  inset: 28px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  width: calc(var(--extracted-book-h, 380px) - 80px);
+}
+
+.book-experience__title-text {
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 1.2vw, 0.92rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--book-text, rgba(255, 255, 255, 0.92));
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.50);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.book-experience__divider {
+  width: 18px;
+  height: 1px;
+  background: var(--book-accent, rgba(255, 255, 255, 0.38));
+  display: block;
+  opacity: 0.60;
+  flex-shrink: 0;
+}
+
+.book-experience__year-text {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 300;
+  letter-spacing: 0.20em;
+  color: var(--book-text, rgba(255, 255, 255, 0.65));
+  opacity: 0.75;
+}
+
+.book-experience__publisher {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  font-family: var(--font-display);
+  font-size: 0.42rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--book-text, rgba(255, 255, 255, 0.32));
+  opacity: 0.38;
+  white-space: nowrap;
+  z-index: 4;
+  transform-origin: center;
+  transform: translateX(-50%) rotate(-90deg) translateX(calc(var(--extracted-book-h, 380px) / 2 - 26px));
+}
+
+
+// ── 25. Page Edges — extracted ────────────────────────────────────────────────
+.book-experience__pages {
+  width: 8px;
+  height: var(--extracted-book-h, 380px);
+  background: linear-gradient(
+    to right,
+    var(--book-page, #f0e8d8) 0%,
+    rgba(205, 190, 165, 0.88) 50%,
+    rgba(185, 168, 145, 0.76) 100%
+  );
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(205, 190, 165, 0.32);
+  border-bottom: 1px solid rgba(185, 168, 145, 0.40);
+  border-right: 1px solid rgba(125, 105, 75, 0.38);
+  flex-shrink: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 1px,
+      rgba(0, 0, 0, 0.042) 1px,
+      rgba(0, 0, 0, 0.042) 2px
+    );
+  }
+
+  @media (max-width: 640px) { width: 5px; }
+}
+
+
+// ── 26. Extraction Shadow ─────────────────────────────────────────────────────
+// Floor shadow rendered beneath the extracted book
+.book-experience__extraction-shadow {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(var(--extracted-book-w, 72px) * 2.4);
+  height: 20px;
+  background: radial-gradient(
+    ellipse 100% 50% at 50% 0%,
+    rgba(0, 0, 0, 0.55),
+    transparent
+  );
+  filter: blur(8px);
+  pointer-events: none;
+  border-radius: 50%;
+
+  @media (max-width: 640px) {
+    display: none; // Skip on mobile — performance
+  }
+}
+
+
+// ── 27. Glow Ring — extraction halo ──────────────────────────────────────────
+// A subtle ambient halo behind the extracted book that fades in after settle
+.book-experience__glow-ring {
+  position: absolute;
+  inset: -28px -20px;
+  border-radius: 8px;
+  background: radial-gradient(
+    ellipse 70% 80% at 30% 50%,
+    rgba(100, 200, 140, 0.08) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+
+// ── 28. Project Meta Panel ────────────────────────────────────────────────────
+// Appears beside (desktop) or below (mobile) the extracted book
+.book-experience__meta {
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  @media (max-width: 900px) {
+    max-width: 480px;
+    text-align: center;
+    align-items: center;
+  }
+
+  @media (max-width: 640px) {
+    max-width: 100%;
+    gap: 0.55rem;
+  }
+}
+
+.book-experience__meta-eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.30em;
+  text-transform: uppercase;
+  color: var(--bs-green-400);
+  opacity: 0.80;
+}
+
+.book-experience__meta-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3vw, 2.6rem);
+  font-weight: 300;
+  line-height: 1.10;
+  color: rgba(255, 255, 255, 0.96);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.book-experience__meta-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(0.86rem, 1.3vw, 1.02rem);
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  line-height: 1.60;
+}
+
+.book-experience__meta-location {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.10em;
+  color: rgba(100, 200, 140, 0.70);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.book-experience__meta-description {
+  font-family: var(--font-display);
+  font-size: clamp(0.84rem, 1.2vw, 0.96rem);
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.50);
+  margin: 0;
+  line-height: 1.85;
+  max-width: 300px;
+
+  @media (max-width: 900px) {
+    display: none; // Keep mobile UI clean; description in Phase 2
+  }
+}
+
+.book-experience__meta-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+
+  font-family: var(--font-body);
+  font-size: 0.54rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.24);
+}
+
+.book-experience__meta-hint-line {
+  flex: 1;
+  height: 1px;
+  max-width: 40px;
+  background: rgba(100, 200, 140, 0.18);
+}
+
+
+// ── 29. Cinematic Floor Reflection ───────────────────────────────────────────
+.book-experience__floor {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  pointer-events: none;
+  z-index: 202;
+
+  background: linear-gradient(
+    to top,
+    rgba(4, 14, 9, 0.55) 0%,
+    rgba(4, 14, 9, 0.20) 40%,
+    transparent 100%
+  );
+
+  @media (max-width: 640px) { height: 80px; }
+}
+
+
+// ── 30. Reduced motion — Phase 1 additions ────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .book-experience__backdrop,
+  .book-experience,
+  .book-experience__close,
+  .book-experience__glow-ring,
+  .book-experience__meta,
+  .book-experience__extraction-shadow {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  // Framer Motion respects prefers-reduced-motion automatically
+  // when using the `layout` prop — no additional override needed
+}
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// bookshelf.scss — Phase 2 Extension
+//
+// ⚠ APPEND THIS CONTENT TO THE EXISTING bookshelf.scss
+//
+// This file only contains Phase 2 additions.
+// All Phase 1 tokens, cabinet, shelf, book, and overlay styles are preserved.
+//
+// Phase 2 adds:
+//  · .book-experience--open modifier
+//  · .book-experience__open-wrapper
+//  · .open-book full 3D component
+//  · Page spread layouts (desktop / mobile)
+//  · GSAP target classes
+//  · Editorial typography
+//  · Paper texture overlays
+//  · Fold shadows
+//  · Spine continuity
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Phase 2 tokens (extend design system) ────────────────────────────────────
+:root {
+  // Open book dimensions
+  --ob-width-desktop:    860px;
+  --ob-height-desktop:   560px;
+  --ob-spine-w:          32px;
+  --ob-page-w:           calc((var(--ob-width-desktop) - var(--ob-spine-w)) / 2);
+
+  --ob-width-mobile:     340px;
+  --ob-height-mobile:    520px;
+
+  // Paper & material
+  --ob-paper:            #F5F0E8;
+  --ob-paper-alt:        #EFE9DC;
+  --ob-paper-dark:       #E8E0D0;
+  --ob-ink:              #2A2420;
+  --ob-ink-muted:        #6A5E50;
+  --ob-ink-faint:        #A09080;
+  --ob-rule:             rgba(42, 36, 32, 0.12);
+  --ob-fold-shadow:      linear-gradient(to right, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.07) 28%, transparent 55%);
+  --ob-fold-shadow-l:    linear-gradient(to left,  rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.05) 28%, transparent 55%);
+  --ob-edge-shadow:      linear-gradient(to right, transparent 0%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.18) 100%);
+  --ob-page-shadow:      0 24px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.12);
+
+  // Typography
+  --ob-font-display:     "Georgia", "Times New Roman", serif;
+  --ob-font-body:        "Georgia", serif;
+  --ob-font-mono:        "Courier New", monospace;
+  --ob-font-ui:          system-ui, -apple-system, sans-serif;
+
+  // Animation timing
+  --ob-perspective:      1200px;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BookExperience — Phase 2 modifiers
+// ─────────────────────────────────────────────────────────────────────────────
+
+// When book is open, expand the overlay stage
+.book-experience--open {
+  align-items: center;
+  justify-content: center;
+
+  .book-experience__stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Stage transitions between closed and open states
+.book-experience__stage--open {
+  .book-experience__extracted {
+    pointer-events: none;
+  }
+}
+
+// Wrapper that fades in the open book
+.book-experience__open-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+
+  @media (max-width: 640px) {
+    padding: 12px 8px;
+    align-items: flex-start;
+    padding-top: 56px;
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OpenBook — Root
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  // Sizing
+  width: var(--ob-width-desktop);
+  max-width: calc(100vw - 48px);
+
+  @media (max-width: 640px) {
+    width: var(--ob-width-mobile);
+    max-width: calc(100vw - 16px);
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3-D Scene wrapper
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__3d-scene {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  height: var(--ob-height-desktop);
+
+  // 3-D context
+  perspective:       var(--ob-perspective);
+  perspective-origin: 50% 48%;
+  transform-style:   preserve-3d;
+
+  // Drop shadow for the whole spread
+  filter: drop-shadow(var(--ob-page-shadow));
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    height: auto;
+    perspective: 800px;
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Spine column (hinge axis)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__spine-3d {
+  position: relative;
+  flex: 0 0 var(--ob-spine-w);
+  width: var(--ob-spine-w);
+  height: 100%;
+  background: var(--book-color, #1A1918);
+  z-index: 10;
+  overflow: hidden;
+  border-radius: 2px 0 0 2px;
+  transform-origin: center center;
+
+  // Continuity sheen — left edge highlight
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right,
+      rgba(255,255,255,0.12) 0%,
+      transparent 40%
+    );
+    pointer-events: none;
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.open-book__spine-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.08) 0%,
+    transparent 50%,
+    rgba(0,0,0,0.15) 100%
+  );
+  pointer-events: none;
+}
+
+.open-book__spine-title {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  transform-origin: center center;
+  white-space: nowrap;
+  font-family: var(--ob-font-display);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--book-text, #B8A98A);
+  opacity: 0.70;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Left page — project image
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__pages-left {
+  position: relative;
+  flex: 0 0 var(--ob-page-w);
+  width: var(--ob-page-w);
+  height: 100%;
+  overflow: hidden;
+  // GSAP controls opacity
+  opacity: 0;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    height: 220px;
+    flex: none;
+    opacity: 0; // GSAP still controls
+  }
+}
+
+// Shared paper surface
+.open-book__page-paper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--ob-paper);
+  overflow: hidden;
+
+  // Subtle warm paper gradient
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at 30% 20%,
+      rgba(255,248,230,0.55) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Paper grain overlay
+.open-book__paper-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' seed='8' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.028'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 2;
+}
+
+// Cover image — fills left page
+.open-book__cover-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+
+  // Vignette over image
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top,  rgba(20,16,12,0.38) 0%, transparent 45%),
+      linear-gradient(to right, transparent 70%, rgba(20,16,12,0.20) 100%);
+    pointer-events: none;
+  }
+
+  &--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Left page caption
+.open-book__left-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 4;
+}
+
+.open-book__caption-cat {
+  font-family: var(--ob-font-ui);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.82);
+  font-weight: 500;
+}
+
+.open-book__caption-loc {
+  font-family: var(--ob-font-ui);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.65);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// Left edge shadow (depth cue at right edge of left page)
+.open-book__left-edge-shadow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 28px;
+  height: 100%;
+  background: var(--ob-edge-shadow);
+  pointer-events: none;
+  z-index: 5;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Right page — editorial content
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__pages-right {
+  position: relative;
+  flex: 0 0 var(--ob-page-w);
+  width: var(--ob-page-w);
+  height: 100%;
+  // GSAP controls opacity and x
+  opacity: 0;
+  transform: translateX(24px);
+
+  @media (max-width: 640px) {
+    width: 100%;
+    height: auto;
+    min-height: 340px;
+    flex: none;
+    opacity: 0;
+  }
+}
+
+.open-book__page-paper--right {
+  background: var(--ob-paper-alt);
+
+  // Warm right-side lighting
+  &::before {
+    background: radial-gradient(
+      ellipse at 70% 15%,
+      rgba(255,245,220,0.40) 0%,
+      transparent 65%
+    );
+  }
+}
+
+// Content scroll area
+.open-book__content-scroll {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 36px 32px 28px 28px;
+  z-index: 3;
+
+  // Custom scrollbar — minimal editorial
+  scrollbar-width: thin;
+  scrollbar-color: rgba(42,36,32,0.15) transparent;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(42,36,32,0.18);
+    border-radius: 2px;
+  }
+
+  @media (max-width: 640px) {
+    padding: 24px 20px 20px;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+// Right page left-edge shadow (fold depth)
+.open-book__right-edge-shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.16) 0%,
+    rgba(0,0,0,0.06) 40%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+// Page numbers
+.open-book__page-num {
+  position: absolute;
+  bottom: 14px;
+  font-family: var(--ob-font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: var(--ob-ink-faint);
+  z-index: 6;
+
+  &--left  { right: 20px; }
+  &--right { left: 20px; }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Editorial typography — right page content
+// ─────────────────────────────────────────────────────────────────────────────
+
+// All reveal targets — GSAP animates opacity and y
+.open-book__reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  // GSAP will override these
+}
+
+.open-book__eyebrow {
+  display: block;
+  font-family: var(--ob-font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--book-accent, #C4956A);
+  margin-bottom: 12px;
+}
+
+.open-book__title {
+  font-family: var(--ob-font-display);
+  font-size: clamp(18px, 2.6vw, 26px);
+  font-weight: 400;
+  line-height: 1.18;
+  color: var(--ob-ink);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+
+  @media (max-width: 640px) {
+    font-size: 20px;
+  }
+}
+
+.open-book__subtitle {
+  font-family: var(--ob-font-body);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ob-ink-muted);
+  margin: 0 0 16px;
+  letter-spacing: 0.02em;
+}
+
+.open-book__rule {
+  width: 36px;
+  height: 1px;
+  background: var(--book-accent, #C4956A);
+  margin: 0 0 18px;
+  opacity: 0.55;
+}
+
+.open-book__body {
+  font-family: var(--ob-font-body);
+  font-size: 11px;
+  line-height: 1.75;
+  color: var(--ob-ink-muted);
+  margin: 0 0 20px;
+  letter-spacing: 0.01em;
+
+  @media (max-width: 640px) {
+    font-size: 12px;
+  }
+}
+
+// Challenge / Solution callout blocks
+.open-book__callout-block {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: rgba(42,36,32,0.04);
+  border-left: 2px solid var(--book-accent, #C4956A);
+  border-radius: 0 3px 3px 0;
+}
+
+.open-book__callout-label {
+  font-family: var(--ob-font-ui);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--book-accent, #C4956A);
+  margin-bottom: 6px;
+}
+
+.open-book__callout-text {
+  font-family: var(--ob-font-body);
+  font-size: 10.5px;
+  line-height: 1.68;
+  color: var(--ob-ink-muted);
+  margin: 0;
+}
+
+// Technologies
+.open-book__tech-block {
+  margin-bottom: 16px;
+}
+
+.open-book__tech-label {
+  font-family: var(--ob-font-ui);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ob-ink-faint);
+  margin-bottom: 8px;
+}
+
+.open-book__tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.open-book__tech-tag {
+  font-family: var(--ob-font-ui);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  color: var(--ob-ink-muted);
+  background: rgba(42,36,32,0.06);
+  border: 1px solid rgba(42,36,32,0.10);
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+// Tags
+.open-book__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+
+.open-book__tag {
+  font-family: var(--ob-font-ui);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--book-accent, #C4956A);
+  border: 1px solid rgba(196,149,106,0.30);
+  padding: 2px 7px;
+  border-radius: 1px;
+}
+
+// Credits
+.open-book__credits {
+  padding-top: 12px;
+  border-top: 1px solid var(--ob-rule);
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.open-book__credits-label {
+  font-family: var(--ob-font-ui);
+  font-size: 7.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ob-ink-faint);
+}
+
+.open-book__credits-text {
+  font-family: var(--ob-font-body);
+  font-size: 9px;
+  line-height: 1.55;
+  color: var(--ob-ink-faint);
+  font-style: italic;
+}
+
+// Publisher imprint
+.open-book__imprint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  margin-top: 4px;
+  font-family: var(--ob-font-ui);
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ob-ink-faint);
+  opacity: 0.65;
+}
+
+.open-book__imprint-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ob-ink-faint);
+  opacity: 0.40;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Front cover — the rotating piece
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__cover-front {
+  position: absolute;
+  top: 0;
+  left: 0;
+  // Cover exactly spans spine + left page
+  width: calc(var(--ob-page-w) + var(--ob-spine-w));
+  height: 100%;
+  background: var(--book-color, #1A1918);
+
+  // Critical 3-D config
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transform: rotateY(0deg);
+  backface-visibility: hidden;
+
+  z-index: 20; // On top before animation; GSAP moves it
+  border-radius: 2px 3px 3px 2px;
+  overflow: hidden;
+
+  @media (max-width: 640px) {
+    // Mobile: cover spans full width, positioned at top
+    position: relative;
+    width: 100%;
+    height: 60px;
+    flex: none;
+    border-radius: 4px 4px 0 0;
+  }
+}
+
+// Grain over cover
+.open-book__cover-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' seed='12' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+  background-size: 200px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+// Binding bands on cover
+.open-book__cover-band {
+  position: absolute;
+  left: var(--ob-spine-w);
+  right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.09);
+
+  &--top    { top: 22px; }
+  &--bottom { bottom: 22px; }
+}
+
+// Cover sheen (light reflection)
+.open-book__cover-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255,255,255,0.11) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(0,0,0,0.18) 100%
+  );
+  pointer-events: none;
+}
+
+// Inner face of cover (visible when open)
+.open-book__cover-inner {
+  position: absolute;
+  inset: 0;
+  // Shown on the back face when cover rotates open
+  backface-visibility: visible;
+  transform: rotateY(180deg);
+  background: var(--ob-paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.open-book__cover-inner-logo {
+  font-family: var(--ob-font-display);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ob-ink-faint);
+}
+
+.open-book__cover-inner-year {
+  font-family: var(--ob-font-mono);
+  font-size: 9px;
+  color: var(--ob-ink-faint);
+  opacity: 0.65;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Back cover
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__cover-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--ob-page-w) + var(--ob-spine-w));
+  height: 100%;
+  background: var(--book-color, #1A1918);
+  z-index: 1; // Behind left page
+  border-radius: 2px 3px 3px 2px;
+  overflow: hidden;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.open-book__cover-back-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E");
+  background-size: 200px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.open-book__cover-back-logo {
+  position: absolute;
+  bottom: 24px;
+  right: 20px;
+  font-family: var(--ob-font-display);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--book-text, #B8A98A);
+  opacity: 0.45;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fold shadow — vertical gradient at spine seam
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__fold-shadow {
+  position: absolute;
+  top: 0;
+  // Centered at the spine/page seam
+  left: calc(var(--ob-spine-w));
+  width: 40px;
+  height: 100%;
+  background: var(--ob-fold-shadow);
+  pointer-events: none;
+  z-index: 15;
+  // GSAP controls opacity
+  opacity: 0;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Page stack edge — right edge of full spread
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__page-stack {
+  position: absolute;
+  top: 3px;
+  right: -8px;
+  width: 8px;
+  height: calc(100% - 6px);
+  background: linear-gradient(
+    to right,
+    var(--ob-paper-dark) 0%,
+    var(--ob-paper) 35%,
+    var(--ob-paper-dark) 65%,
+    #D8D0C0 100%
+  );
+  border-radius: 0 2px 2px 0;
+
+  // Subtle page-layer lines
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.025) 3px,
+      rgba(0,0,0,0.025) 4px
+    );
+    border-radius: inherit;
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Floor shadow beneath open book
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book__floor-shadow {
+  width: 88%;
+  height: 32px;
+  margin-top: 8px;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(0,0,0,0.28) 0%,
+    rgba(0,0,0,0.10) 45%,
+    transparent 75%
+  );
+  pointer-events: none;
+
+  @media (max-width: 640px) {
+    height: 16px;
+    margin-top: 4px;
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mobile — stacked layout overrides
+// ─────────────────────────────────────────────────────────────────────────────
+
+.open-book--mobile {
+  .open-book__3d-scene {
+    flex-direction: column;
+    height: auto;
+    filter: drop-shadow(0 12px 40px rgba(0,0,0,0.24));
+  }
+
+  .open-book__pages-left {
+    width: 100%;
+    height: 200px;
+    flex: none;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+  }
+
+  .open-book__pages-right {
+    width: 100%;
+    height: auto;
+    flex: none;
+    border-radius: 0 0 4px 4px;
+  }
+
+  .open-book__content-scroll {
+    height: auto;
+    overflow: visible;
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+
+  .open-book__cover-front {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 200px; // matches left page height
+    z-index: 20;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .open-book__title {
+    font-size: 18px;
+  }
+
+  .open-book__body {
+    font-size: 11px;
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reduced motion — disable 3D, show content immediately
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+  .open-book__cover-front {
+    transform: rotateY(-172deg) !important;
+  }
+
+  .open-book__pages-left,
+  .open-book__pages-right,
+  .open-book__fold-shadow,
+  .open-book__reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2 — BookExperience back-compat tweaks
+// These ensure the closed-book extraction state from Phase 1 remains
+// visually correct while bookOpen=false, and hides gracefully when bookOpen=true
+// ─────────────────────────────────────────────────────────────────────────────
+
+// When experience is open, the meta block is hidden (OpenBook has its own)
+.book-experience--open .book-experience__meta {
+  display: none;
+}
+
+// Stage when open: full dimensions for OpenBook
+.book-experience--open .book-experience__stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

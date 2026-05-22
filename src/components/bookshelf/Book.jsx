@@ -3,18 +3,19 @@ import { motion } from "framer-motion";
 import clsx from "clsx";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Book — Redesigned
+// Book — Phase 1 Update
 //
-// Key fixes:
-// · Hover label now shows as a white elevated card with clear text
-// · Mobile: tap activates isActive state (no broken hover)
-// · Proper touch cancel/end cleanup
-// · Breakpoint hook is now reactive (matchMedia listener)
+// Changes from original:
+//  · Added layoutId={`book-${project.id}`} on the spine wrapper
+//  · Added `isSelected` prop for extraction state awareness
+//  · When isSelected: suppress hover state, reduce opacity for "ghost"
+//  · Preserved all existing hover/touch/keyboard interactions
+//  · Preserved all variants and responsive breakpoints
 // ─────────────────────────────────────────────────────────────────────────────
 
 const ease = [0.25, 0.1, 0.25, 1];
 
-// Reactive breakpoint hook
+// Reactive breakpoint hook (unchanged from original)
 function useBreakpoint() {
   const getState = () => {
     if (typeof window === "undefined") return { isMobile: false, isTablet: false };
@@ -41,7 +42,7 @@ function useBreakpoint() {
   return state;
 }
 
-// ── Motion config ─────────────────────────────────────────────────────────────
+// ── Motion config (unchanged) ─────────────────────────────────────────────────
 const liftVariants = {
   desktop: {
     rest:  { y: 0,   transition: { duration: 0.55, ease } },
@@ -73,18 +74,22 @@ const shadowVariants = {
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function Book({ project, onClick }) {
+export default function Book({ project, onClick, isSelected = false }) {
   const [isActive, setIsActive] = useState(false);
   const { isMobile, isTablet } = useBreakpoint();
   const tier = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
 
   const {
+    id,
     title, category, year,
     spineColor, spineGradient, textColor, accentColor, pageColor,
     height, thickness,
   } = project;
 
-  // Responsive dimensions
+  // When this book is selected/extracted, suppress its hover interaction
+  const effectiveActive = isSelected ? false : isActive;
+
+  // Responsive dimensions (unchanged)
   const scaledHeight = isTablet
     ? Math.round(height * 0.82)
     : isMobile
@@ -107,18 +112,17 @@ export default function Book({ project, onClick }) {
     "--book-w":        `${scaledWidth}px`,
   };
 
-  // Desktop/tablet: use framer-motion hover events
-  // Mobile: use touch events to toggle isActive
+  // Desktop/tablet: framer-motion hover events (unchanged)
   const motionProps = isMobile
     ? {}
     : {
-        onHoverStart: () => setIsActive(true),
+        onHoverStart: () => !isSelected && setIsActive(true),
         onHoverEnd:   () => setIsActive(false),
       };
 
   const touchProps = isMobile
     ? {
-        onTouchStart:  () => setIsActive(true),
+        onTouchStart:  () => !isSelected && setIsActive(true),
         onTouchEnd:    () => setTimeout(() => setIsActive(false), 600),
         onTouchCancel: () => setIsActive(false),
       }
@@ -133,24 +137,30 @@ export default function Book({ project, onClick }) {
 
   return (
     <motion.div
-      className={clsx("book", isMobile && "book--mobile", isTablet && "book--tablet")}
+      className={clsx(
+        "book",
+        isMobile && "book--mobile",
+        isTablet && "book--tablet",
+        isSelected && "book--selected"
+      )}
       style={cssVars}
       initial="rest"
-      animate={isActive ? "hover" : "rest"}
-      onClick={() => onClick?.(project)}
+      animate={effectiveActive ? "hover" : "rest"}
+      onClick={() => !isSelected && onClick?.(project)}
       role="button"
       tabIndex={0}
       aria-label={`${title} — ${category}, ${year}`}
+      aria-pressed={isSelected}
       onKeyDown={handleKeyDown}
       {...motionProps}
       {...touchProps}
     >
-      {/* ── Hover/active label card — white elevated card ─────────── */}
+      {/* ── Hover/active label card ──────────────────────────────────── */}
       <motion.div
         className="book__label"
         initial={{ opacity: 0, y: 8, scale: 0.96 }}
         animate={
-          isActive
+          effectiveActive
             ? { opacity: 1, y: 0, scale: 1, transition: { duration: 0.22, ease } }
             : { opacity: 0, y: 8, scale: 0.96, transition: { duration: 0.18 } }
         }
@@ -161,13 +171,38 @@ export default function Book({ project, onClick }) {
         <span className="book__label-meta">{category} · {year}</span>
       </motion.div>
 
-      {/* ── Lift animation wrapper ───────────────────────────────── */}
-      <motion.div className="book__wrapper" variants={liftVariants[tier]}>
-        {/* Top surface — desktop/tablet 3-D illusion */}
+      {/* ── Lift animation wrapper ───────────────────────────────────── */}
+      <motion.div
+        className="book__wrapper"
+        variants={liftVariants[tier]}
+        // When selected: ghost the shelf copy subtly so user knows it's "gone"
+        animate={isSelected ? { opacity: 0.28, y: 0 } : effectiveActive ? "hover" : "rest"}
+        transition={isSelected ? { duration: 0.45, ease } : undefined}
+      >
+        {/* Top surface 3-D — desktop/tablet */}
         {!isMobile && <div className="book__top" aria-hidden="true" />}
 
-        {/* Main spine */}
-        <div className="book__spine" aria-hidden="true">
+        {/* ── Main spine — THIS is the shared layout anchor ─────────────
+            layoutId connects this to the extracted book in BookExperience.
+            Framer Motion will animate between these two positions.
+        ──────────────────────────────────────────────────────────────── */}
+        <motion.div
+          layoutId={`book-${id}`}
+          className="book__spine"
+          aria-hidden="true"
+          layout
+          transition={{
+            layout: { duration: 0.72, ease: [0.32, 0.08, 0.16, 1.0] },
+          }}
+          style={{
+            // Preserve spine's intrinsic CSS variable sizing when on shelf
+            width: "var(--book-w, 30px)",
+            height: "var(--book-h, 100px)",
+            background: spineGradient
+              ? `${spineGradient}, ${spineColor}`
+              : spineColor,
+          }}
+        >
           <div className="book__binding book__binding--top" />
           <div className="book__binding book__binding--bottom" />
           <div className="book__grain" />
@@ -183,7 +218,7 @@ export default function Book({ project, onClick }) {
           <div className="book__publisher" aria-hidden="true">
             Design Synthesis
           </div>
-        </div>
+        </motion.div>
 
         {/* Page edges */}
         <div className="book__pages" aria-hidden="true" />
@@ -193,6 +228,7 @@ export default function Book({ project, onClick }) {
       <motion.div
         className="book__floor-shadow"
         variants={shadowVariants[tier]}
+        animate={isSelected ? { opacity: 0, scaleX: 1 } : effectiveActive ? "hover" : "rest"}
         aria-hidden="true"
       />
     </motion.div>

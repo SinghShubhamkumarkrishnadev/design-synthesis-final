@@ -5,10 +5,12 @@ import Book from "./Book";
 import ShelfShadow from "./ShelfShadow";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shelf — Redesigned
-// · Reactive useIsMobile hook (matchMedia listener, SSR-safe)
-// · Compact book height via --book-h CSS variable
-// · shadowIntensity: 1.0 top shelf, 0.65 lower
+// Shelf — Phase 1 Update
+//
+// Changes from original:
+//  · Accepts `selectedProject` prop
+//  · Passes `isSelected={project.id === selectedProject?.id}` to each Book
+//  · All layout, animation, responsive behavior unchanged
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SHELF_LABELS = ["Archive I", "Archive II", "Archive III"];
@@ -45,7 +47,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-// ── Bookend ───────────────────────────────────────────────────────────────────
+// ── Bookend (unchanged) ───────────────────────────────────────────────────────
 function Bookend({ side = "left" }) {
   return (
     <div className={clsx("bookend", `bookend--${side}`)} aria-hidden="true">
@@ -57,7 +59,12 @@ function Bookend({ side = "left" }) {
 }
 
 // ── Shelf ─────────────────────────────────────────────────────────────────────
-export default function Shelf({ projects = [], shelfIndex = 0, onBookClick }) {
+export default function Shelf({
+  projects = [],
+  shelfIndex = 0,
+  onBookClick,
+  selectedProject = null,
+}) {
   const ref = useRef(null);
   const isMobile = useIsMobile();
 
@@ -99,7 +106,11 @@ export default function Shelf({ projects = [], shelfIndex = 0, onBookClick }) {
             variants={bookVariants}
             style={{ display: "flex", alignItems: "flex-end", flexShrink: 0 }}
           >
-            <Book project={project} onClick={onBookClick} />
+            <Book
+              project={project}
+              onClick={onBookClick}
+              isSelected={selectedProject?.id === project.id}
+            />
           </motion.div>
         ))}
 

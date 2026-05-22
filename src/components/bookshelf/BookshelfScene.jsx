@@ -5,13 +5,12 @@ import Shelf from "./Shelf";
 import { getProjectsByShelf, SHELF_COUNT } from "../../data/projects";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BookshelfScene — Redesigned
+// BookshelfScene — Phase 1 Update
 //
-// · Pure CSS light background — no image dependency
-// · Lighter walnut cabinet tones for the light theme
-// · Compact shelf height
-// · Left-anchored on desktop, centered on tablet/mobile
-// · Subtle perspective tilt on desktop only
+// Changes from original:
+//  · Accepts `selectedProject` prop
+//  · Passes it down to Shelf so books can receive isSelected state
+//  · All cabinet styling, animation, layout unchanged
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SHELF_GLOW_POSITIONS = ["33%", "67%", "100%"];
@@ -38,7 +37,7 @@ function useBreakpoint() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-export default function BookshelfScene({ onBookSelect }) {
+export default function BookshelfScene({ onBookSelect, selectedProject = null }) {
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
 
@@ -86,6 +85,7 @@ export default function BookshelfScene({ onBookSelect }) {
                     shelfIndex={index}
                     projects={projects}
                     onBookClick={handleBookClick}
+                    selectedProject={selectedProject}
                   />
                 ))}
 
