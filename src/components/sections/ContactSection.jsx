@@ -163,10 +163,55 @@ export default function ContactSection() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !/^\S+@\S+\.\S+$/.test(formData.email)) {
-      toast.error("Please fill in required fields correctly.");
+    
+    // Trim values to avoid whitespace bypass tricks
+    const trimmedName = formData.name.trim();
+    const trimmedEmail = formData.email.trim();
+    const trimmedPhone = formData.phone.trim();
+    const trimmedMessage = formData.message.trim();
+
+    // 1. Name Validation
+    if (!trimmedName) {
+      toast.error("Please enter your full name.");
       return;
     }
+    if (trimmedName.length < 2) {
+      toast.error("Name must be at least 2 characters long.");
+      return;
+    }
+
+    // 2. Phone Validation (Optional but must be valid if structured)
+    if (trimmedPhone) {
+      const phoneRegex = /^[6-9]\d{9}$/; // Standard Indian mobile tracking pattern (10 digits starting with 6-9)
+      // Strip out spaces or dashes user might have typed to validate raw digits cleanly
+      const cleanPhone = trimmedPhone.replace(/[\s-]/g, "");
+      if (!phoneRegex.test(cleanPhone)) {
+        toast.error("Please enter a valid 10-digit Indian phone number.");
+        return;
+      }
+    }
+
+    // 3. Email Validation
+    if (!trimmedEmail) {
+      toast.error("Email address is required.");
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-0._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    // 4. Message Validation
+    if (!trimmedMessage) {
+      toast.error("Please type your project inquiry message.");
+      return;
+    }
+    if (trimmedMessage.length < 10) {
+      toast.error("Message must be at least 10 characters long.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await new Promise((res) => setTimeout(res, 2200));
@@ -361,56 +406,95 @@ export default function ContactSection() {
                     </p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                      <div className="relative group">
+                  <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      
+                      {/* Full Name Field */}
+                      <div className="w-full text-zinc-600">
+                        <label className="text-zinc-700 font-semibold text-sm tracking-wide">
+                          Full Name
+                        </label>
+                        <div className="relative mt-2 text-zinc-500">
+                          <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            placeholder="John Doe"
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white/50 backdrop-blur-xs outline-none border border-zinc-300/80 focus:border-[#2c4a3b] shadow-xs rounded-xl transition-all duration-200 text-base text-[#1b1b1b] placeholder-zinc-400 font-medium"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Phone Number Field with Clean Layout Badge */}
+                      <div className="w-full text-zinc-600">
+                        <label className="text-zinc-700 font-semibold text-sm tracking-wide">
+                          Phone number
+                        </label>
+                        <div className="relative mt-2 text-zinc-500 flex items-center">
+                          {/* Left aligned Badge Container */}
+                          <div className="absolute left-3 flex items-center justify-center gap-1.5 border-r border-zinc-300/80 pr-2.5 h-5 pointer-events-none select-none z-10">
+                            {/* Indian Flag SVG Micro-Graphic */}
+                            <svg width="16" height="12" viewBox="0 0 3 2" className="rounded-xs shadow-xs">
+                              <path fill="#F4C430" d="M0 0h3v.67H0z"/>
+                              <path fill="#FFF" d="M0 .67h3v.66H0z"/>
+                              <path fill="#090" d="M0 1.33h3V2H0z"/>
+                              <circle cx="1.5" cy="1" r=".2" fill="#000080"/>
+                            </svg>
+                            <span className="text-xs font-bold text-zinc-800 tracking-wider">
+                              +91
+                            </span>
+                          </div>
+                          
+                          {/* Updated pl-18 layout to guarantee zero layout overlapping */}
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            placeholder="9876543210"
+                            onChange={handleChange}
+                            className="w-full pl-18 pr-4 py-3 bg-white/50 backdrop-blur-xs outline-none border border-zinc-300/80 focus:border-[#2c4a3b] shadow-xs rounded-xl transition-all duration-200 text-base text-[#1b1b1b] placeholder-zinc-400 font-medium"
+                          />
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Email Address Field */}
+                    <div className="w-full text-zinc-600">
+                      <label className="text-zinc-700 font-semibold text-sm tracking-wide">
+                        Email Address
+                      </label>
+                      <div className="relative mt-2 text-zinc-500">
                         <input
-                          type="text"
-                          name="name"
-                          value={formData.name}
-                          placeholder="Full Name"
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          placeholder="you@example.com"
                           onChange={handleChange}
-                          className="w-full border-b-2 border-zinc-300 py-4 focus:border-[#2c4a3b] outline-none transition-all text-base bg-transparent text-[#1b1b1b] placeholder-zinc-400 font-medium"
-                          required
+                          className="w-full px-4 py-3 bg-white/50 backdrop-blur-xs outline-none border border-zinc-300/80 focus:border-[#2c4a3b] shadow-xs rounded-xl transition-all duration-200 text-base text-[#1b1b1b] placeholder-zinc-400 font-medium"
                         />
                       </div>
-                      <div className="relative group">
-                        <input
-                          type="text"
-                          name="phone"
-                          value={formData.phone}
-                          placeholder="Phone Number"
+                    </div>
+
+                    {/* Description / Message Field */}
+                    <div className="w-full text-zinc-600">
+                      <label className="text-zinc-700 font-semibold text-sm tracking-wide">
+                        Your Message
+                      </label>
+                      <div className="relative mt-2 text-zinc-500">
+                        <textarea
+                          name="message"
+                          rows="4"
+                          value={formData.message}
+                          placeholder="Tell us about your project lines..."
                           onChange={handleChange}
-                          className="w-full border-b-2 border-zinc-300 py-4 focus:border-[#2c4a3b] outline-none transition-all text-base bg-transparent text-[#1b1b1b] placeholder-zinc-400 font-medium"
+                          className="w-full px-4 py-3 bg-white/50 backdrop-blur-xs outline-none border border-zinc-300/80 focus:border-[#2c4a3b] shadow-xs rounded-xl transition-all duration-200 resize-none text-base text-[#1b1b1b] placeholder-zinc-400 font-medium leading-relaxed"
                         />
                       </div>
                     </div>
 
-                    <div className="relative group">
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        placeholder="Email Address"
-                        onChange={handleChange}
-                        className="w-full border-b-2 border-zinc-300 py-4 focus:border-[#2c4a3b] outline-none transition-all text-base bg-transparent text-[#1b1b1b] placeholder-zinc-400 font-medium"
-                        required
-                      />
-                    </div>
-
-                    <div className="relative group">
-                      <textarea
-                        name="message"
-                        rows="4"
-                        value={formData.message}
-                        placeholder="Your Message"
-                        onChange={handleChange}
-                        className="w-full border-b-2 border-zinc-300 py-4 focus:border-[#2c4a3b] outline-none transition-all resize-none text-base bg-transparent text-[#1b1b1b] placeholder-zinc-400 font-medium leading-relaxed"
-                        required
-                      ></textarea>
-                    </div>
-
-                    <div className="w-full pt-2">
+                    <div className="w-full pt-4">
                       <LiquidGlassButton
                         type="submit"
                         isSubmitting={isSubmitting}
