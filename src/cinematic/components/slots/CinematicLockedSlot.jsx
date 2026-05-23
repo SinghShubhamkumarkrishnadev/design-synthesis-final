@@ -1,23 +1,37 @@
 /**
- * CinematicLockedSlot.jsx  [Phase 2 — updated]
+ * CinematicLockedSlot.jsx  [Phase 3]
  * ─────────────────────────────────────────────────────────────────
  * Phase: LOCKED
  *
- * Phase 2 adds:
- *   • Black background that fades in cleanly after the intro exits.
- *   • The GSAP enter uses the same fade-from-black pattern as the
- *     video slots so all transitions feel consistent.
- *   • Pattern lock UI is NOT implemented yet (Phase 3).
- *   • DEV skip button preserved for iteration.
+ * Phase 3 replaces the stub entirely.
+ *
+ * What this slot owns:
+ *   • GSAP enter fade (consistent with other slots)
+ *   • PatternLockOverlay mounting
+ *   • onSolved callback routing (dispatches LOCK_SOLVED via orchestrator)
+ *
+ * What PatternLockOverlay owns:
+ *   • Freeze-frame image rendering
+ *   • Glass panel
+ *   • Interactive SVG pattern grid
+ *   • Framer Motion entrance / success exit
+ *   • Status label
+ *
+ * The slot container is intentionally transparent — the overlay
+ * renders the background itself to maintain visual control.
+ *
+ * DEV skip button is preserved in development builds.
  * ─────────────────────────────────────────────────────────────────
  */
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
+import { PatternLockOverlay } from "../lock/PatternLockOverlay";
+import "../../styles/pattern-lock.css";
 
 export function CinematicLockedSlot({ onSolved }) {
   const containerRef = useRef(null);
 
-  // Simple enter fade — no exit needed (pattern lock will handle exit)
+  // ── Enter fade — matches Phase 2 slot convention ──────────────────
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -26,7 +40,7 @@ export function CinematicLockedSlot({ onSolved }) {
       gsap.fromTo(
         container,
         { opacity: 0 },
-        { opacity: 1, duration: 0.5, ease: "power2.out" }
+        { opacity: 1, duration: 0.6, ease: "power2.out" }
       );
     }, container);
 
@@ -37,50 +51,40 @@ export function CinematicLockedSlot({ onSolved }) {
     <div
       ref={containerRef}
       style={{
-        position:        "fixed",
-        inset:           0,
-        background:      "#000",
-        display:         "flex",
-        alignItems:      "center",
-        justifyContent:  "center",
-        opacity:         0,
-        transform:       "translateZ(0)",
-        willChange:      "opacity",
+        position:   "fixed",
+        inset:       0,
+        zIndex:      0,
+        opacity:     0,
+        transform:  "translateZ(0)",
+        willChange: "opacity",
+        // No background here — PatternLockOverlay owns the visual stack
       }}
     >
-      {/*
-       * Phase 3 will mount the pattern lock component here.
-       * The container layout is intentionally minimal so Phase 3
-       * can take full creative control of its contents.
-       */}
+      {/* ── Pattern lock system ─────────────────────────────────── */}
+      <PatternLockOverlay onUnlocked={onSolved} />
 
+      {/* ── DEV skip ───────────────────────────────────────────── */}
       {import.meta.env.DEV && (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
-          <span style={{
-            color:       "rgba(255,255,255,0.25)",
-            fontFamily:  "monospace",
-            fontSize:    "11px",
-            letterSpacing: "0.15em",
-          }}>
-            [ LOCKED SLOT — PHASE 3 PATTERN LOCK ]
-          </span>
-          <button
-            onClick={onSolved}
-            style={{
-              padding:      "6px 16px",
-              background:   "rgba(255,255,255,0.08)",
-              border:       "1px solid rgba(255,255,255,0.15)",
-              borderRadius: "4px",
-              color:        "rgba(255,255,255,0.6)",
-              cursor:       "pointer",
-              fontFamily:   "monospace",
-              fontSize:     "11px",
-              letterSpacing: "0.1em",
-            }}
-          >
-            skip → interior
-          </button>
-        </div>
+        <button
+          onClick={onSolved}
+          style={{
+            position:     "fixed",
+            bottom:       "24px",
+            right:        "24px",
+            padding:      "5px 14px",
+            background:   "rgba(255,255,255,0.06)",
+            border:       "1px solid rgba(255,255,255,0.12)",
+            borderRadius: "3px",
+            color:        "rgba(255,255,255,0.4)",
+            cursor:       "pointer",
+            fontFamily:   "monospace",
+            fontSize:     "10px",
+            letterSpacing: "0.1em",
+            zIndex:        9999,
+          }}
+        >
+          skip →
+        </button>
       )}
     </div>
   );
