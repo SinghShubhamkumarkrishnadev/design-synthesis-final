@@ -3,6 +3,10 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    /*
+     * scroll-behavior: smooth is REMOVED intentionally.
+     * Lenis handles smooth scrolling. Keeping both causes
+     * double-smooth jank and conflicts with lenis.stop().
+     */
   }
 }
