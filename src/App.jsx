@@ -36,6 +36,23 @@ export default function App() {
   const [isNavExpanded,  setIsNavExpanded ] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  /* Prevent body scrolling while loading screen is active */
+  useEffect(() => {
+    if (isLoading) {
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100vh";
+    } else {
+      document.body.style.overflow = "unset";
+      document.body.style.height = "unset";
+    }
+
+    // Cleanup block to ensure scroll restores if component unmounts unexpectedly
+    return () => {
+      document.body.style.overflow = "unset";
+      document.body.style.height = "unset";
+    };
+  }, [isLoading]);
+
   /* Section observer */
   useEffect(() => {
     if (isLoading) return;
@@ -51,15 +68,17 @@ export default function App() {
     return () => observer.disconnect();
   }, [isLoading]);
 
-  /* Scroll progress */
+  /* Scroll progress — now properly paused until loading completes */
   useEffect(() => {
+    if (isLoading) return;
+
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (totalScroll > 0) setScrollProgress((window.scrollY / totalScroll) * 100);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isLoading]);
 
   return (
     <>
