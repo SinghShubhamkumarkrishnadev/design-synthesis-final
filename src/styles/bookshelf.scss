@@ -22,29 +22,28 @@
   --bs-bg-glass-border:  rgba(255, 255, 255, 0.80);
 
   // ── Forest green — primary brand color from reference ─────────────────
-  --bs-green-900:        #0D2B1E;   // deepest — footer bg
-  --bs-green-800:        #14382A;   // dark headers
-  --bs-green-700:        #1B4835;   // rich green
-  --bs-green-600:        #235E44;   // mid
-  --bs-green-500:        #2D7356;   // accent
-  --bs-green-400:        #3D8F6A;   // lighter accent
+  --bs-green-900:        #0D2B1E;
+  --bs-green-800:        #14382A;
+  --bs-green-700:        #1B4835;
+  --bs-green-600:        #235E44;
+  --bs-green-500:        #2D7356;
+  --bs-green-400:        #3D8F6A;
   --bs-green-200:        rgba(45, 115, 86, 0.14);
   --bs-green-100:        rgba(45, 115, 86, 0.07);
   --bs-green-tint:       rgba(13, 43, 30, 0.06);
 
   // ── Wood palette — light, warm, sage-toned ────────────────────────────
-  // Shifted to warm greenish-tan to complement forest green theme
-  --bs-wood-shadow:      #2A3D2E;   // darkest — only for deep shadows
-  --bs-wood-dark:        #4A5E42;   // dark panel
-  --bs-wood-mid:         #6B7D5E;   // mid panel
-  --bs-wood-warm:        #8E9E7E;   // main plank
-  --bs-wood-light:       #B0BC9E;   // light plank
-  --bs-wood-highlight:   #CDD5BE;   // highlight
+  --bs-wood-shadow:      #2A3D2E;
+  --bs-wood-dark:        #4A5E42;
+  --bs-wood-mid:         #6B7D5E;
+  --bs-wood-warm:        #8E9E7E;
+  --bs-wood-light:       #B0BC9E;
+  --bs-wood-highlight:   #CDD5BE;
   --bs-wood-edge:        rgba(107, 125, 94, 0.45);
-  --bs-wood-inner:       #1A2A1C;   // cavity — kept dark for book contrast
+  --bs-wood-inner:       #1A2A1C;
 
   // ── Typography ────────────────────────────────────────────────────────
-  --bs-text-primary:     #0D2B1E;   // deep forest green — matches reference headings
+  --bs-text-primary:     #0D2B1E;
   --bs-text-secondary:   #235E44;
   --bs-text-accent:      #2D7356;
   --bs-text-muted:       rgba(13, 43, 30, 0.48);
@@ -104,87 +103,73 @@
   overflow: hidden;
   animation: section-in 0.6s ease both;
 
-// ── Background redesigned to match current project theme ─────────────
-background-color: #EEF1EE;
-background-image:
-  // Soft top glow
-  radial-gradient(
-    ellipse 80% 60% at 50% -10%,
-    rgba(255,255,255,0.95) 0%,
-    rgba(255,255,255,0.55) 38%,
-    transparent 72%
-  ),
-
-  // Ambient sage wash from right
-  radial-gradient(
-    ellipse 55% 75% at 100% 45%,
-    rgba(45,115,86,0.045) 0%,
-    transparent 65%
-  ),
-
-  // Soft green depth at bottom-left
-  radial-gradient(
-    ellipse 45% 55% at 0% 100%,
-    rgba(13,43,30,0.035) 0%,
-    transparent 60%
-  ),
-
-  // Main cool surface gradient
-  linear-gradient(
-    180deg,
-    #F4F6F4 0%,
-    #EEF1EE 38%,
-    #E8ECE8 72%,
-    #E3E8E4 100%
-  );
-
-  // Ultra subtle grid texture matching site aesthetic
-&::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-
+  background-color: #EEF1EE;
   background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0px,
-      transparent 5px,
-      rgba(13,43,30,0.015) 6px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent 0px,
-      transparent 5px,
-      rgba(13,43,30,0.012) 6px
-    );
-
-  opacity: 0.22;
-  pointer-events: none;
-  z-index: 0;
-}
-
-// Soft atmospheric blending
-&::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-
-  background:
     radial-gradient(
-      ellipse 90% 80% at 0% 0%,
-      rgba(13,43,30,0.03) 0%,
-      transparent 55%
+      ellipse 80% 60% at 50% -10%,
+      rgba(255,255,255,0.95) 0%,
+      rgba(255,255,255,0.55) 38%,
+      transparent 72%
     ),
-
     radial-gradient(
-      ellipse 60% 45% at 100% 100%,
-      rgba(45,115,86,0.03) 0%,
+      ellipse 55% 75% at 100% 45%,
+      rgba(45,115,86,0.045) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 45% 55% at 0% 100%,
+      rgba(13,43,30,0.035) 0%,
       transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      #F4F6F4 0%,
+      #EEF1EE 38%,
+      #E8ECE8 72%,
+      #E3E8E4 100%
     );
 
-  pointer-events: none;
-  z-index: 0;
-}
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 5px,
+        rgba(13,43,30,0.015) 6px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 5px,
+        rgba(13,43,30,0.012) 6px
+      );
+    opacity: 0.22;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        ellipse 90% 80% at 0% 0%,
+        rgba(13,43,30,0.03) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 45% at 100% 100%,
+        rgba(45,115,86,0.03) 0%,
+        transparent 60%
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -192,8 +177,6 @@ background-image:
   > * { position: relative; z-index: 1; }
 }
 
-// Organic sketch decorative lines (SVG background layer — optional enhancement)
-// These can be placed via a pseudo or inline SVG without image dependency.
 .works-section__deco-lines {
   position: absolute;
   inset: 0;
@@ -210,6 +193,7 @@ background-image:
     max-width: 420px;
   }
 }
+
 
 // ── 4. Section Header — centered ─────────────────────────────────────────────
 .works-section__header {
@@ -336,7 +320,6 @@ background-image:
 
 
 // ── 6. Info — Interaction Hint card ──────────────────────────────────────────
-// Matches the glassmorphism pill/card style from reference image
 .info-hint {
   display: flex;
   align-items: flex-start;
@@ -459,7 +442,6 @@ background-image:
   width: clamp(260px, 48vw, 590px);
   flex-shrink: 0;
 
-  // Floor shadow — soft
   &::after {
     content: '';
     position: absolute;
@@ -472,7 +454,6 @@ background-image:
     border-radius: 50%;
   }
 
-  // Wall bloom — very soft on light bg
   &::before {
     content: '';
     position: absolute;
@@ -485,7 +466,6 @@ background-image:
 
   > * { position: relative; z-index: 1; }
 
-  // Subtle perspective on desktop
   transform-style: preserve-3d;
   transform: perspective(1200px) rotateY(2deg) rotateX(0.6deg);
   transition: transform 0.65s cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -508,7 +488,6 @@ background-image:
   }
 }
 
-// Crown molding — soft sage wood
 .cabinet__crown {
   height: 20px;
   background: linear-gradient(180deg,
@@ -527,7 +506,6 @@ background-image:
   position: relative;
   overflow: hidden;
 
-  // Grain
   &::before {
     content: '';
     position: absolute;
@@ -537,7 +515,6 @@ background-image:
     );
   }
 
-  // Inlay
   &::after {
     content: '';
     position: absolute;
@@ -596,7 +573,6 @@ background-image:
 .cabinet__inner {
   flex: 1;
   position: relative;
-  // Dark cavity to make books pop — but not harshly dark
   background: linear-gradient(180deg,
     #1A2A1C 0%,
     #1E3020 42%,
@@ -882,7 +858,6 @@ background-image:
     0 3px 12px rgba(0,0,0,0.40),
     0 1px 2px rgba(0,0,0,0.62);
 
-  // Grain
   &::after {
     content: '';
     position: absolute;
@@ -892,7 +867,6 @@ background-image:
     );
   }
 
-  // Ambient led under plank
   &::before {
     content: '';
     position: absolute;
@@ -936,7 +910,7 @@ background-image:
   cursor: pointer;
   outline: none;
   overflow: visible;
-  padding-top: 60px;   // space for hover card above
+  padding-top: 60px;
 
   &:focus-visible .book__spine {
     outline: 2px solid rgba(45,115,86,0.60);
@@ -949,7 +923,6 @@ background-image:
   }
 }
 
-// ── Hover/tap card — clean glass card above book ──────────────────────────────
 .book__label {
   position: absolute;
   top: 0;
@@ -958,7 +931,6 @@ background-image:
   pointer-events: none;
   z-index: 30;
 
-  // Glass card — matches site's glassmorphism pill style
   background: rgba(255, 255, 255, 0.90);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -1006,7 +978,6 @@ background-image:
   display: block;
 }
 
-// Book wrapper — lift animation target
 .book__wrapper {
   position: relative;
   display: flex;
@@ -1014,7 +985,6 @@ background-image:
   filter: url(#ds-grain);
 }
 
-// Top surface 3-D illusion
 .book__top {
   position: absolute;
   top: -4px;
@@ -1190,7 +1160,6 @@ background-image:
 
 
 // ── 15. Project Panel ─────────────────────────────────────────────────────────
-// Matches glassmorphism card style from reference
 .project-panel {
   position: fixed;
   bottom: 1.5rem;
@@ -1324,37 +1293,18 @@ background-image:
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // bookshelf.scss — PHASE 1 ADDITIONS
-// Append these rules to the END of your existing bookshelf.scss
-//
-// Covers:
-//  · Cinematic backdrop
-//  · Fullscreen extraction overlay
-//  · Extracted closed book (enlarged, centered)
-//  · Project meta panel beside the book
-//  · Extraction shadow & glow ring
-//  · Responsive breakpoints
-//  · Selected ("ghost") state on shelf book
-//  · Reduced motion support additions
 // ═══════════════════════════════════════════════════════════════════════════════
 
-
-// ── Additional Phase 1 tokens ─────────────────────────────────────────────────
 :root {
-  // Extracted book dimensions — responsive via CSS custom props
   --extracted-book-h:  380px;
   --extracted-book-w:  72px;
-
-  // Backdrop
   --backdrop-color:    rgba(8, 22, 14, 0.82);
-  --backdrop-blur:     0px;   // We purposely avoid blur on backdrop for performance
-
-  // Extraction glow
+  --backdrop-blur:     0px;
   --extraction-glow:   rgba(100, 200, 140, 0.18);
 }
 
 
 // ── 18. Book selected / ghost state on shelf ──────────────────────────────────
-// When a book is extracted, its shelf copy becomes a ghost placeholder
 .book--selected {
   pointer-events: none;
 
@@ -1363,8 +1313,6 @@ background-image:
     pointer-events: none;
   }
 
-  // The spine opacity is controlled by Framer Motion inline,
-  // but we can reinforce with a CSS transition for non-JS cases
   .book__wrapper {
     transition: opacity 0.45s ease;
   }
@@ -1372,15 +1320,12 @@ background-image:
 
 
 // ── 19. Cinematic Backdrop ────────────────────────────────────────────────────
-// Sits behind the overlay, above the page content
 .book-experience__backdrop {
   position: fixed;
   inset: 0;
   z-index: 200;
 
-  // Rich dark film — preserves bookshelf silhouette visibility
   background:
-    // Vignette from edges
     radial-gradient(
       ellipse 100% 100% at 50% 50%,
       rgba(8, 22, 14, 0.68) 0%,
@@ -1388,10 +1333,8 @@ background-image:
       rgba(4, 12, 8, 0.94) 100%
     );
 
-  // No heavy blur — GPU friendly
   cursor: pointer;
 
-  // Grain overlay using noise SVG data URI — matches existing cabinet style
   &::after {
     content: '';
     position: absolute;
@@ -1406,7 +1349,6 @@ background-image:
 
 
 // ── 20. Book Experience Container ─────────────────────────────────────────────
-// Full viewport, centered flex layout
 .book-experience {
   position: fixed;
   inset: 0;
@@ -1414,9 +1356,8 @@ background-image:
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none; // children handle their own pointer events
+  pointer-events: none;
 
-  // Prevent accidental text selection during extraction motion
   user-select: none;
   -webkit-user-select: none;
 }
@@ -1470,7 +1411,6 @@ background-image:
 
 
 // ── 22. Extraction Stage ──────────────────────────────────────────────────────
-// Flex row: book spine | meta panel
 .book-experience__stage {
   display: flex;
   align-items: center;
@@ -1479,7 +1419,6 @@ background-image:
   pointer-events: auto;
   position: relative;
 
-  // Subtle upward offset from true center — feels more editorial
   transform: translateY(-2vh);
 
   @media (max-width: 900px) {
@@ -1492,26 +1431,22 @@ background-image:
   @media (max-width: 640px) {
     gap: 1.5rem;
     padding: 0 1rem;
-    // On mobile, keep book centered, meta below
     align-items: center;
   }
 }
 
 
 // ── 23. Extracted Book Wrapper ────────────────────────────────────────────────
-// This is the shared-layout target that receives the book from the shelf
 .book-experience__extracted {
   position: relative;
   display: flex;
   align-items: flex-end;
   flex-shrink: 0;
 
-  // Drop shadow — dramatic extraction lighting
   filter:
     drop-shadow(0 32px 64px rgba(0, 0, 0, 0.60))
     drop-shadow(0 8px 20px rgba(0, 0, 0, 0.40));
 
-  // GPU hint
   will-change: transform;
 
   @media (max-width: 900px) {
@@ -1526,8 +1461,6 @@ background-image:
 
 
 // ── 24. Extracted Spine ───────────────────────────────────────────────────────
-// Mirrors book__spine structure at extraction scale.
-// Framer Motion's layoutId animates the spine from shelf → here.
 .book-experience__spine {
   width: var(--extracted-book-w, 72px);
   height: var(--extracted-book-h, 380px);
@@ -1541,8 +1474,6 @@ background-image:
   border-left: 1px solid rgba(255, 255, 255, 0.14);
   border-top: 1px solid rgba(255, 255, 255, 0.10);
   border-bottom: 1px solid rgba(0, 0, 0, 0.32);
-
-  // Main highlight sheen — rendered via .book-experience__sheen child
 }
 
 .book-experience__binding {
@@ -1592,7 +1523,6 @@ background-image:
   pointer-events: none;
 }
 
-// Vertical text track — same structure as book__text-track, scaled up
 .book-experience__text-track {
   position: absolute;
   inset: 28px 0;
@@ -1695,7 +1625,6 @@ background-image:
 
 
 // ── 26. Extraction Shadow ─────────────────────────────────────────────────────
-// Floor shadow rendered beneath the extracted book
 .book-experience__extraction-shadow {
   position: absolute;
   bottom: -28px;
@@ -1712,14 +1641,11 @@ background-image:
   pointer-events: none;
   border-radius: 50%;
 
-  @media (max-width: 640px) {
-    display: none; // Skip on mobile — performance
-  }
+  @media (max-width: 640px) { display: none; }
 }
 
 
 // ── 27. Glow Ring — extraction halo ──────────────────────────────────────────
-// A subtle ambient halo behind the extracted book that fades in after settle
 .book-experience__glow-ring {
   position: absolute;
   inset: -28px -20px;
@@ -1735,7 +1661,6 @@ background-image:
 
 
 // ── 28. Project Meta Panel ────────────────────────────────────────────────────
-// Appears beside (desktop) or below (mobile) the extracted book
 .book-experience__meta {
   max-width: 320px;
   display: flex;
@@ -1807,9 +1732,7 @@ background-image:
   line-height: 1.85;
   max-width: 300px;
 
-  @media (max-width: 900px) {
-    display: none; // Keep mobile UI clean; description in Phase 2
-  }
+  @media (max-width: 900px) { display: none; }
 }
 
 .book-experience__meta-hint {
@@ -1866,36 +1789,14 @@ background-image:
     transition: none !important;
     animation: none !important;
   }
-
-  // Framer Motion respects prefers-reduced-motion automatically
-  // when using the `layout` prop — no additional override needed
 }
 
 
-
-// ─────────────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 // bookshelf.scss — Phase 2 Extension
-//
-// ⚠ APPEND THIS CONTENT TO THE EXISTING bookshelf.scss
-//
-// This file only contains Phase 2 additions.
-// All Phase 1 tokens, cabinet, shelf, book, and overlay styles are preserved.
-//
-// Phase 2 adds:
-//  · .book-experience--open modifier
-//  · .book-experience__open-wrapper
-//  · .open-book full 3D component
-//  · Page spread layouts (desktop / mobile)
-//  · GSAP target classes
-//  · Editorial typography
-//  · Paper texture overlays
-//  · Fold shadows
-//  · Spine continuity
-// ─────────────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 
-// ── Phase 2 tokens (extend design system) ────────────────────────────────────
 :root {
-  // Open book dimensions
   --ob-width-desktop:    860px;
   --ob-height-desktop:   560px;
   --ob-spine-w:          32px;
@@ -1904,7 +1805,6 @@ background-image:
   --ob-width-mobile:     340px;
   --ob-height-mobile:    520px;
 
-  // Paper & material
   --ob-paper:            #F5F0E8;
   --ob-paper-alt:        #EFE9DC;
   --ob-paper-dark:       #E8E0D0;
@@ -1917,22 +1817,17 @@ background-image:
   --ob-edge-shadow:      linear-gradient(to right, transparent 0%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.18) 100%);
   --ob-page-shadow:      0 24px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.12);
 
-  // Typography
   --ob-font-display:     "Georgia", "Times New Roman", serif;
   --ob-font-body:        "Georgia", serif;
   --ob-font-mono:        "Courier New", monospace;
   --ob-font-ui:          system-ui, -apple-system, sans-serif;
 
-  // Animation timing
   --ob-perspective:      1200px;
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BookExperience — Phase 2 modifiers
-// ─────────────────────────────────────────────────────────────────────────────
+// ── BookExperience — Phase 2 modifiers ───────────────────────────────────────
 
-// When book is open, expand the overlay stage
 .book-experience--open {
   align-items: center;
   justify-content: center;
@@ -1946,14 +1841,12 @@ background-image:
   }
 }
 
-// Stage transitions between closed and open states
 .book-experience__stage--open {
   .book-experience__extracted {
     pointer-events: none;
   }
 }
 
-// Wrapper that fades in the open book
 .book-experience__open-wrapper {
   display: flex;
   align-items: center;
@@ -1970,9 +1863,7 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// OpenBook — Root
-// ─────────────────────────────────────────────────────────────────────────────
+// ── OpenBook — Root ───────────────────────────────────────────────────────────
 
 .open-book {
   position: relative;
@@ -1980,7 +1871,6 @@ background-image:
   flex-direction: column;
   align-items: center;
 
-  // Sizing
   width: var(--ob-width-desktop);
   max-width: calc(100vw - 48px);
 
@@ -1991,9 +1881,7 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 3-D Scene wrapper
-// ─────────────────────────────────────────────────────────────────────────────
+// ── 3-D Scene wrapper ─────────────────────────────────────────────────────────
 
 .open-book__3d-scene {
   position: relative;
@@ -2003,12 +1891,10 @@ background-image:
   width: 100%;
   height: var(--ob-height-desktop);
 
-  // 3-D context
   perspective:       var(--ob-perspective);
   perspective-origin: 50% 48%;
   transform-style:   preserve-3d;
 
-  // Drop shadow for the whole spread
   filter: drop-shadow(var(--ob-page-shadow));
 
   @media (max-width: 640px) {
@@ -2019,9 +1905,7 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Spine column (hinge axis)
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Spine column (hinge axis) ─────────────────────────────────────────────────
 
 .open-book__spine-3d {
   position: relative;
@@ -2034,7 +1918,6 @@ background-image:
   border-radius: 2px 0 0 2px;
   transform-origin: center center;
 
-  // Continuity sheen — left edge highlight
   &::before {
     content: "";
     position: absolute;
@@ -2046,9 +1929,7 @@ background-image:
     pointer-events: none;
   }
 
-  @media (max-width: 640px) {
-    display: none;
-  }
+  @media (max-width: 640px) { display: none; }
 }
 
 .open-book__spine-sheen {
@@ -2079,9 +1960,7 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Left page — project image
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Left page — project image ─────────────────────────────────────────────────
 
 .open-book__pages-left {
   position: relative;
@@ -2096,7 +1975,7 @@ background-image:
     width: 100%;
     height: 220px;
     flex: none;
-    opacity: 0; // GSAP still controls
+    opacity: 0;
   }
 }
 
@@ -2108,7 +1987,6 @@ background-image:
   background: var(--ob-paper);
   overflow: hidden;
 
-  // Subtle warm paper gradient
   &::before {
     content: "";
     position: absolute;
@@ -2143,7 +2021,6 @@ background-image:
   background-position: center;
   z-index: 0;
 
-  // Vignette over image
   &::after {
     content: "";
     position: absolute;
@@ -2205,16 +2082,13 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Right page — editorial content
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Right page — editorial content ────────────────────────────────────────────
 
 .open-book__pages-right {
   position: relative;
   flex: 0 0 var(--ob-page-w);
   width: var(--ob-page-w);
   height: 100%;
-  // GSAP controls opacity and x
   opacity: 0;
   transform: translateX(24px);
 
@@ -2230,7 +2104,6 @@ background-image:
 .open-book__page-paper--right {
   background: var(--ob-paper-alt);
 
-  // Warm right-side lighting
   &::before {
     background: radial-gradient(
       ellipse at 70% 15%,
@@ -2249,20 +2122,12 @@ background-image:
   padding: 36px 32px 28px 28px;
   z-index: 3;
 
-  // Custom scrollbar — minimal editorial
   scrollbar-width: thin;
   scrollbar-color: rgba(42,36,32,0.15) transparent;
 
-  &::-webkit-scrollbar {
-    width: 3px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(42,36,32,0.18);
-    border-radius: 2px;
-  }
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(42,36,32,0.18); border-radius: 2px; }
 
   @media (max-width: 640px) {
     padding: 24px 20px 20px;
@@ -2303,15 +2168,11 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Editorial typography — right page content
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Editorial typography — right page content ─────────────────────────────────
 
-// All reveal targets — GSAP animates opacity and y
 .open-book__reveal {
   opacity: 0;
   transform: translateY(16px);
-  // GSAP will override these
 }
 
 .open-book__eyebrow {
@@ -2334,9 +2195,7 @@ background-image:
   margin: 0 0 6px;
   letter-spacing: -0.01em;
 
-  @media (max-width: 640px) {
-    font-size: 20px;
-  }
+  @media (max-width: 640px) { font-size: 20px; }
 }
 
 .open-book__subtitle {
@@ -2364,12 +2223,9 @@ background-image:
   margin: 0 0 20px;
   letter-spacing: 0.01em;
 
-  @media (max-width: 640px) {
-    font-size: 12px;
-  }
+  @media (max-width: 640px) { font-size: 12px; }
 }
 
-// Challenge / Solution callout blocks
 .open-book__callout-block {
   margin-bottom: 16px;
   padding: 12px 14px;
@@ -2396,10 +2252,7 @@ background-image:
   margin: 0;
 }
 
-// Technologies
-.open-book__tech-block {
-  margin-bottom: 16px;
-}
+.open-book__tech-block { margin-bottom: 16px; }
 
 .open-book__tech-label {
   font-family: var(--ob-font-ui);
@@ -2428,7 +2281,6 @@ background-image:
   border-radius: 2px;
 }
 
-// Tags
 .open-book__tags {
   display: flex;
   flex-wrap: wrap;
@@ -2447,7 +2299,6 @@ background-image:
   border-radius: 1px;
 }
 
-// Credits
 .open-book__credits {
   padding-top: 12px;
   border-top: 1px solid var(--ob-rule);
@@ -2474,7 +2325,6 @@ background-image:
   font-style: italic;
 }
 
-// Publisher imprint
 .open-book__imprint {
   display: flex;
   align-items: center;
@@ -2498,31 +2348,26 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Front cover — the rotating piece
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Front cover — the rotating piece ─────────────────────────────────────────
 
 .open-book__cover-front {
   position: absolute;
   top: 0;
   left: 0;
-  // Cover exactly spans spine + left page
   width: calc(var(--ob-page-w) + var(--ob-spine-w));
   height: 100%;
   background: var(--book-color, #1A1918);
 
-  // Critical 3-D config
   transform-origin: left center;
   transform-style: preserve-3d;
   transform: rotateY(0deg);
   backface-visibility: hidden;
 
-  z-index: 20; // On top before animation; GSAP moves it
+  z-index: 20;
   border-radius: 2px 3px 3px 2px;
   overflow: hidden;
 
   @media (max-width: 640px) {
-    // Mobile: cover spans full width, positioned at top
     position: relative;
     width: 100%;
     height: 60px;
@@ -2531,7 +2376,6 @@ background-image:
   }
 }
 
-// Grain over cover
 .open-book__cover-grain {
   position: absolute;
   inset: 0;
@@ -2541,7 +2385,6 @@ background-image:
   pointer-events: none;
 }
 
-// Binding bands on cover
 .open-book__cover-band {
   position: absolute;
   left: var(--ob-spine-w);
@@ -2553,7 +2396,6 @@ background-image:
   &--bottom { bottom: 22px; }
 }
 
-// Cover sheen (light reflection)
 .open-book__cover-sheen {
   position: absolute;
   inset: 0;
@@ -2567,11 +2409,9 @@ background-image:
   pointer-events: none;
 }
 
-// Inner face of cover (visible when open)
 .open-book__cover-inner {
   position: absolute;
   inset: 0;
-  // Shown on the back face when cover rotates open
   backface-visibility: visible;
   transform: rotateY(180deg);
   background: var(--ob-paper);
@@ -2598,9 +2438,7 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Back cover
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Back cover ────────────────────────────────────────────────────────────────
 
 .open-book__cover-back {
   position: absolute;
@@ -2609,13 +2447,11 @@ background-image:
   width: calc(var(--ob-page-w) + var(--ob-spine-w));
   height: 100%;
   background: var(--book-color, #1A1918);
-  z-index: 1; // Behind left page
+  z-index: 1;
   border-radius: 2px 3px 3px 2px;
   overflow: hidden;
 
-  @media (max-width: 640px) {
-    display: none;
-  }
+  @media (max-width: 640px) { display: none; }
 }
 
 .open-book__cover-back-grain {
@@ -2640,32 +2476,24 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Fold shadow — vertical gradient at spine seam
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Fold shadow — vertical gradient at spine seam ─────────────────────────────
 
 .open-book__fold-shadow {
   position: absolute;
   top: 0;
-  // Centered at the spine/page seam
   left: calc(var(--ob-spine-w));
   width: 40px;
   height: 100%;
   background: var(--ob-fold-shadow);
   pointer-events: none;
   z-index: 15;
-  // GSAP controls opacity
   opacity: 0;
 
-  @media (max-width: 640px) {
-    display: none;
-  }
+  @media (max-width: 640px) { display: none; }
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Page stack edge — right edge of full spread
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Page stack edge — right edge of full spread ───────────────────────────────
 
 .open-book__page-stack {
   position: absolute;
@@ -2682,7 +2510,6 @@ background-image:
   );
   border-radius: 0 2px 2px 0;
 
-  // Subtle page-layer lines
   &::before {
     content: "";
     position: absolute;
@@ -2697,15 +2524,11 @@ background-image:
     border-radius: inherit;
   }
 
-  @media (max-width: 640px) {
-    display: none;
-  }
+  @media (max-width: 640px) { display: none; }
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Floor shadow beneath open book
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Floor shadow beneath open book ────────────────────────────────────────────
 
 .open-book__floor-shadow {
   width: 88%;
@@ -2726,9 +2549,7 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Mobile — stacked layout overrides
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Mobile — stacked layout overrides ────────────────────────────────────────
 
 .open-book--mobile {
   .open-book__3d-scene {
@@ -2764,24 +2585,17 @@ background-image:
     top: 0;
     left: 0;
     width: 100%;
-    height: 200px; // matches left page height
+    height: 200px;
     z-index: 20;
     border-radius: 4px 4px 0 0;
   }
 
-  .open-book__title {
-    font-size: 18px;
-  }
-
-  .open-book__body {
-    font-size: 11px;
-  }
+  .open-book__title  { font-size: 18px; }
+  .open-book__body   { font-size: 11px; }
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Reduced motion — disable 3D, show content immediately
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Reduced motion — disable 3D, show content immediately ────────────────────
 
 @media (prefers-reduced-motion: reduce) {
   .open-book__cover-front {
@@ -2798,18 +2612,12 @@ background-image:
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Phase 2 — BookExperience back-compat tweaks
-// These ensure the closed-book extraction state from Phase 1 remains
-// visually correct while bookOpen=false, and hides gracefully when bookOpen=true
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Phase 2 — BookExperience back-compat tweaks ───────────────────────────────
 
-// When experience is open, the meta block is hidden (OpenBook has its own)
 .book-experience--open .book-experience__meta {
   display: none;
 }
 
-// Stage when open: full dimensions for OpenBook
 .book-experience--open .book-experience__stage {
   position: fixed;
   inset: 0;
@@ -2818,75 +2626,56 @@ background-image:
   justify-content: center;
 }
 
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // bookshelf.scss — UX Fix Patch
-//
-// APPEND THIS ENTIRE BLOCK to the bottom of your existing bookshelf.scss.
-// Do NOT replace any existing rules — these are additive overrides only.
-//
-// Fixes applied:
-//   1. Overlay pointer-events — makes the overlay clickable for backdrop-close
-//   2. Left-page image rendering — ensures cover image fills the left page
-//   3. Portal rendering — ensures body-level fixed elements are z-index correct
-//   4. Mobile close accessibility — slightly larger close button tap area
 // ═══════════════════════════════════════════════════════════════════════════════
 
 
 // ── Fix #1 — Overlay pointer-events ──────────────────────────────────────────
-//
-// The original .book-experience had pointer-events:none (set as a general
-// rule so only children handle interaction). With the backdrop-click pattern,
-// the overlay ITSELF must be clickable — pointer-events:auto is now set inline
-// in BookExperience.jsx, but we also override here for safety.
-//
-// The stage (inner book container) retains pointer-events:auto naturally
-// since it has no pointer-events:none rule. stopPropagation on the stage
-// prevents click events from reaching the overlay.
-//
-// We remove the blanket pointer-events:none from the overlay here so that
-// clicking the dark area outside the book correctly fires handleClose().
 
 .book-experience {
-  // Override the original pointer-events:none
-  // The overlay must be clickable for backdrop-close to work.
   pointer-events: auto;
-  cursor: default; // Neutral cursor on the overlay backdrop area
+  cursor: default;
 }
 
-// The stage itself (book container) does not need cursor:pointer —
-// it stops propagation so overlay click never fires when clicking inside.
 .book-experience__stage {
   pointer-events: auto;
   cursor: default;
 }
 
-// Open wrapper also needs auto so the book is interactive
 .book-experience__open-wrapper {
   pointer-events: auto;
 }
 
-// Floor div should also not block clicks — it uses stopPropagation
-// but we ensure it doesn't eat backdrop clicks incorrectly
 .book-experience__floor {
-  pointer-events: none; // Floor is purely visual — overlay handles clicks below
+  pointer-events: none;
 }
 
 
 // ── Fix #2 — Left page image rendering ───────────────────────────────────────
 //
-// The left page image was not rendering correctly on desktop because:
-//   · .open-book__pages-left had no explicit position:relative, so
-//     the absolute-positioned .open-book__cover-image had no containing block
-//   · The image div itself needs explicit width/height to fill the container
+// ROOT CAUSE:
+//   .open-book__3d-scene has `filter: drop-shadow(...)` which establishes a
+//   stacking context (SC1). Since .open-book__pages-left and .open-book__page-paper
+//   have no explicit z-index, they do NOT create their own stacking contexts.
+//   This means .open-book__cover-image (z-index: 0) competes directly in SC1,
+//   where .open-book__cover-back (z-index: 1) renders on top of it, hiding
+//   the image behind the dark book-color background.
 //
-// These rules reinforce correct positioning.
+// FIX:
+//   Adding `z-index: 2` to .open-book__pages-left does two things:
+//     1. Establishes its own stacking context (SC2), so cover-image's z-index: 0
+//        is resolved within SC2 — correctly above its own page background
+//        and below the semi-transparent ::before and grain overlays.
+//     2. Places pages-left at z-index 2 in SC1, above cover-back (z-index: 1),
+//        which is the correct visual order: back cover behind the left page.
 
 .open-book__pages-left {
-  // Ensure this is the containing block for absolutely-positioned children
   position: relative;
   overflow: hidden;
+  z-index: 2; /* ← SURGICAL FIX: establishes stacking context so cover-image renders above cover-back (z-index: 1) */
 
-  // Ensure the page-paper fills the full left page container
   .open-book__page-paper {
     position: absolute;
     inset: 0;
@@ -2895,8 +2684,7 @@ background-image:
   }
 }
 
-// Cover image — must be absolutely positioned within .open-book__page-paper
-// which is itself absolutely positioned within .open-book__pages-left
+// Cover image — must fill the page-paper containing block
 .open-book__cover-image {
   position: absolute;
   inset: 0;
@@ -2907,10 +2695,8 @@ background-image:
   background-repeat: no-repeat;
   z-index: 0;
 
-  // Fallback background color if image fails to load
   background-color: var(--ob-paper-dark, #E8E0D0);
 
-  // Ensure the vignette overlay renders above the image
   &::after {
     content: "";
     position: absolute;
@@ -2922,7 +2708,6 @@ background-image:
     z-index: 1;
   }
 
-  // Placeholder state when no image is provided
   &--placeholder {
     display: flex;
     align-items: center;
@@ -2935,22 +2720,22 @@ background-image:
   }
 }
 
-// Left caption must render above the image vignette
+// Left caption renders above image vignette
 .open-book__left-caption {
-  z-index: 5; // Above vignette (::after z-index: 1) and grain (z-index: 2)
+  z-index: 5;
 }
 
-// Paper grain must render above image
+// Grain above image
 .open-book__paper-grain {
   z-index: 3;
 }
 
-// Page-paper ::before (warm highlight) must be above image but below grain
+// Warm highlight between image and grain
 .open-book__page-paper::before {
   z-index: 2;
 }
 
-// Mobile left page — same positioning fix
+// Mobile left page — same stacking fix applies via inherited rule above
 .open-book--mobile .open-book__pages-left {
   position: relative;
 
@@ -2964,37 +2749,25 @@ background-image:
 
 
 // ── Fix #3 — Portal z-index guarantee ────────────────────────────────────────
-//
-// When rendered via React Portal into document.body, the backdrop and overlay
-// are no longer nested inside WorksSection's stacking context. However, other
-// portals (modals, tooltips) on the page might conflict. We use a very high
-// z-index to ensure the book experience always floats above everything.
-//
-// Existing z-index values (200/201) should be sufficient, but we reinforce
-// position:fixed explicitly here to guarantee viewport-level positioning.
 
 .book-experience__backdrop {
   position: fixed;
   inset: 0;
-  z-index: 9000; // High enough to beat any page content
-
-  // Ensure the backdrop is NOT clickable — the overlay div handles clicks.
-  // The backdrop is purely visual.
+  z-index: 9000;
   pointer-events: none;
 }
 
 .book-experience {
   position: fixed;
   inset: 0;
-  z-index: 9001; // One above backdrop
+  z-index: 9001;
 }
 
 .book-experience__close {
   position: fixed;
-  z-index: 9010; // Above everything — always reachable
+  z-index: 9010;
 }
 
-// Stage when open: truly fullscreen fixed layer
 .book-experience--open .book-experience__stage {
   position: fixed;
   inset: 0;
@@ -3004,7 +2777,6 @@ background-image:
   z-index: 9002;
 }
 
-// Floor visual element — fixed at bottom of viewport
 .book-experience__floor {
   position: fixed;
   bottom: 0;
@@ -3015,34 +2787,388 @@ background-image:
 
 
 // ── Fix #4 — Mobile close button tap area ────────────────────────────────────
-//
-// On mobile the close button can be hard to tap. Increase tap area via
-// padding without changing the visual size.
 
 @media (max-width: 640px) {
   .book-experience__close {
-    // Larger invisible tap target using padding trick
     padding: 12px;
     width: 44px;
     height: 44px;
     top: 0.75rem;
     right: 0.75rem;
-    // Ensure it's always on top even on small screens
     z-index: 9010;
   }
 }
 
 
 // ── Fix #5 — Prevent body scroll bleed-through ───────────────────────────────
-//
-// When the overlay is open, ensure body content cannot be seen scrolling
-// behind it on browsers that don't respect overflow:hidden on <html> alone.
 
 body:has([data-scroll-locked]) {
   overflow: hidden;
 }
 
-// Fallback for browsers without :has() support — JS adds this class
 body.scroll-locked {
   overflow: hidden;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// bookshelf.scss — Phase 3 Extension
+// Multi-spread cinematic page-turning system
+//
+// APPEND THIS BLOCK to the end of bookshelf.scss.
+// All selectors are additive — nothing overrides Phase 2 rules.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+
+// ── Turning Page Layer ────────────────────────────────────────────────────────
+//
+// This is the key animated element.
+// It sits absolutely inside .open-book__3d-scene.
+// GSAP controls: opacity, rotateY, transformOrigin, left, width.
+// We only define geometry and 3D setup here — GSAP owns motion.
+//
+// The layer has two faces (front + back) via preserve-3d + backface-visibility.
+// The front face shows the page being "picked up".
+// The back face shows the page being "put down" on the other side.
+
+.open-book__turning-page {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  z-index: 4;
+
+  // 3D context — critical
+  transform-style: preserve-3d;
+  transform-origin: left center; // GSAP overrides per direction
+
+  // Subtle border to reinforce physical thickness
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+
+  // Performance
+  will-change: transform;
+  pointer-events: none;
+
+  @media (max-width: 640px) {
+    display: none; // Mobile uses simplified fade swap
+  }
+}
+
+// Face shared styles
+.open-book__turning-page__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+
+  // Each face is itself a page surface
+  background: var(--ob-paper, #F5F0E8);
+
+  // Warm light gradient — matches static page aesthetic
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at 40% 20%,
+      rgba(255, 248, 230, 0.45) 0%,
+      transparent 65%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Back face — flipped 180° so it's readable when the page has turned
+.open-book__turning-page__face--back {
+  transform: rotateY(180deg);
+  background: var(--ob-paper-alt, #EFE9DC);
+}
+
+// Dynamic shadow across the turning page surface
+// Simulates the curvature shadow during the arc
+.open-book__turning-page__face--front::after,
+.open-book__turning-page__face--back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.10) 0%,
+    rgba(0, 0, 0, 0.04) 30%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.06) 85%,
+    rgba(0, 0, 0, 0.14) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+
+// ── Turning Shadow ─────────────────────────────────────────────────────────────
+//
+// A gradient shadow cast by the turning page onto the static pages beneath.
+// Follows the same horizontal position as the turning page.
+// GSAP controls opacity. CSS defines the shadow shape.
+
+.open-book__turning-shadow {
+  position: absolute;
+  top: 0;
+  width: 60px; // Narrow shadow band at the fold point
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.22) 0%,
+    rgba(0, 0, 0, 0.10) 40%,
+    transparent 100%
+  );
+
+  // Soft vertical fade at top/bottom — realistic light fall-off
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.85) 8%,
+    rgba(0, 0, 0, 0.85) 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.85) 8%,
+    rgba(0, 0, 0, 0.85) 92%,
+    transparent 100%
+  );
+
+  @media (max-width: 640px) { display: none; }
+}
+
+
+// ── Spread Navigation Bar ─────────────────────────────────────────────────────
+//
+// Sits below the open book.
+// Intentionally minimal — typographic, architectural, no dots or app-like UI.
+// Feels like a page index in a printed book, not a carousel control.
+
+.open-book__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+
+  margin-top: 18px;
+  width: 100%;
+
+  // GSAP controls opacity/y on reveal
+  opacity: 0;
+
+  @media (max-width: 640px) {
+    margin-top: 12px;
+    gap: 14px;
+  }
+}
+
+.open-book__nav-btn {
+  // Typography-forward button — no box, no border radius
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+
+  color: rgba(255, 255, 255, 0.65);
+
+  transition:
+    background  0.22s ease,
+    border-color 0.22s ease,
+    color        0.22s ease,
+    transform    0.18s ease;
+
+  &:hover:not(:disabled) {
+    background:   rgba(100, 200, 140, 0.12);
+    border-color: rgba(100, 200, 140, 0.32);
+    color:        rgba(255, 255, 255, 0.92);
+    transform:    scale(1.08);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(100, 200, 140, 0.55);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 640px) {
+    width: 40px;
+    height: 40px; // Larger tap target on mobile
+  }
+}
+
+.open-book__nav-btn--disabled {
+  opacity: 0.22;
+  cursor: default;
+  pointer-events: none;
+}
+
+
+// ── Spread Index — typographic, not dots ──────────────────────────────────────
+//
+// Displays as:  I  ·  III
+// Roman numerals feel archival, editorial, physical.
+// This is a page index — not a progress bar.
+
+.open-book__nav-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-family: var(--ob-font-display, "Georgia", serif);
+  font-size: 10px;
+  letter-spacing: 0.20em;
+  color: rgba(255, 255, 255, 0.38);
+  text-transform: uppercase;
+  user-select: none;
+  min-width: 56px;
+  justify-content: center;
+}
+
+.open-book__nav-current {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 400;
+}
+
+.open-book__nav-sep {
+  width: 16px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+  display: block;
+  flex-shrink: 0;
+}
+
+.open-book__nav-total {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+
+// ── Right page typographic variant for gallery spreads ────────────────────────
+//
+// Gallery spread titles are shorter — a concept label, not a project title.
+// Slightly smaller to leave room for the image-driven left page to breathe.
+
+.open-book__title--spread {
+  font-size: clamp(15px, 2vw, 20px);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ob-ink-muted, #6A5E50);
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  margin-bottom: 12px;
+
+  @media (max-width: 640px) { font-size: 15px; }
+}
+
+
+// ── Mobile: simplified spread swap ────────────────────────────────────────────
+//
+// Mobile hides the 3D turning page layer (too narrow to read).
+// Instead we use a fast opacity cross-fade managed via CSS transition.
+// The nav bar remains functional on mobile.
+
+.open-book--mobile .open-book__pages-left,
+.open-book--mobile .open-book__pages-right {
+  transition: opacity 0.28s ease;
+}
+
+
+// ── Reduced motion overrides ──────────────────────────────────────────────────
+//
+// When prefers-reduced-motion is set:
+//  · No 3D page flip
+//  · Content swaps instantly at spread change
+//  · Nav bar appears without animation
+
+@media (prefers-reduced-motion: reduce) {
+  .open-book__turning-page,
+  .open-book__turning-shadow {
+    display: none !important;
+  }
+
+  .open-book__nav {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .open-book__nav-btn {
+    transition: none !important;
+  }
+}
+
+
+// ── Page stack refinement — shows depth of remaining pages ───────────────────
+//
+// The page stack edge on the right gains a subtle depth indication.
+// More pages remaining = slightly thicker appearance.
+// (The actual thickness is fixed in CSS — GSAP could animate this as an extension.)
+
+.open-book__page-stack {
+  // Base styles are in Phase 2.
+  // Additional micro-shadow on the top edge for depth realism.
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 0 2px 0 0;
+  }
+}
+
+
+// ── Turning page — curvature simulation ──────────────────────────────────────
+//
+// When the page is at 90° (edge-on), it's invisible.
+// At 45° and 135°, we want a subtle bend shadow to suggest paper weight.
+// This is handled purely by the gradient on the face ::after pseudo-element.
+// GSAP controls the rotation — CSS defines the light response.
+//
+// Additional detail: a very faint top/bottom edge line on the turning page
+// suggests the page has physical thickness.
+
+.open-book__turning-page {
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.10);
+    z-index: 10;
+    pointer-events: none;
+  }
 }

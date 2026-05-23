@@ -1,8 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Design Synthesis — Project Archive Data
 // Each project maps to a physical book on the bookshelf
-// Phase 2: Extended with coverImage, gallery, longDescription, challenge,
-//          solution, technologies, credits
+// Phase 3: Fully populated editorial copy and multi-spread mapping systems.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const projects = [
@@ -26,6 +25,34 @@ export const projects = [
     gallery: [
       "https://images.unsplash.com/photo-1600607687939-ce8a6d9db24e?w=900&q=80",
       "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=900&q=80",
+    ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1600607687939-ce8a6d9db24e?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Spatial Concept",
+        rightHeading: "Four Pavilions, One Promenade",
+        rightBody: "The layout sections the domestic program into independent volumes, establishing distinct micro-atmospheres. The sunken circulation spine compresses the occupant's vertical field of view before expanding dynamically into rooms framing the Horizon.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 1,
+        rightLabel: "Material System",
+        rightHeading: "Board-Formed Concrete & Lombard Stone",
+        rightBody: "By treating concrete walls with horizontal rough-sawn pine formwork, the structural mass gains a tactile, grain-like texture. This mineral quality reacts to solar angles, absorbing intense midday glare and casting soft, linear shadows.",
+        pageNumLeft: "V",
+        pageNumRight: "VI",
+      },
     ],
     technologies: ["Board-formed Concrete", "Aged Bronze", "Limestone", "Passive Cooling"],
     credits: "Structural: Ingegneria Alpina · Lighting: Atelier Lumina · Photography: Studio Nord",
@@ -60,6 +87,24 @@ export const projects = [
     gallery: [
       "https://images.unsplash.com/photo-1531971589569-0d9370cbe1e5?w=900&q=80",
     ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1531971589569-0d9370cbe1e5?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Material System",
+        rightHeading: "Carbonized Outer Skins",
+        rightBody: "The process of controlled surface combustion yields a carbon envelope that resists pests, water, and fungal decay natively. The obsidian-like depth of the carbonized timber provides a stark silhouette when set against the shifting mist of the river basin.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
+    ],
     technologies: ["Shou Sugi Ban", "Glulam", "Pivot Screens", "Adaptive Reuse"],
     credits: "Fire Engineering: Pyrotec Lyon · Carpentry: Atelier Bois · Client: Métropole de Lyon",
     spineColor: "#2C1A0E",
@@ -93,6 +138,24 @@ export const projects = [
     gallery: [
       "https://images.unsplash.com/photo-1601628828688-632f38a5a3b2?w=900&q=80",
     ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1601628828688-632f38a5a3b2?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Technical Resolution",
+        rightHeading: "Pre-fabricated Marine Trusses",
+        rightBody: "To circumvent extreme tidal swells, structural steel modules were executed out-of-basin and lowered precisely onto deep-sea piles. The resulting continuous frame handles seismic wind loads while opening up uninhibited interior concourses.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
+    ],
     technologies: ["Weathering Steel", "Douglas Fir", "Prefabrication", "Marine Engineering"],
     credits: "Marine Structural: Arup Oslo · Client: Ruter AS · Photography: Åke Eson Lindman",
     spineColor: "#4A3728",
@@ -125,6 +188,24 @@ export const projects = [
     coverImage: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=900&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=900&q=80",
+    ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Atmospheric Study",
+        rightHeading: "The Solstice Projections",
+        rightBody: "Monolithic black granite plates serve as markers for astronomical cycles. By studying seasonal shadow behavior, the forms were spaced to capture low-angled winter light, creating sharp pathways of void across the raked aggregate fields.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
     ],
     technologies: ["Shirakawa Gravel", "Moss Culture", "Black Granite", "Heritage-Sensitive"],
     credits: "Garden Master: Kenji Matsumoto · Photography: Iwan Baan · Client: Temple Community",
@@ -161,6 +242,24 @@ export const projects = [
     gallery: [
       "https://images.unsplash.com/photo-1577495508326-19a1b3cf65b9?w=900&q=80",
     ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1577495508326-19a1b3cf65b9?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Programme Logic",
+        rightHeading: "Parametric Sky Profiles",
+        rightBody: "The rotational torque curves around a core structural spine. By shifting each plate mechanically by two degrees, the internal column grids change orientation, providing natural overhangs that act as micro-shading systems for floors below.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
+    ],
     technologies: ["Low-Iron Glass", "Parametric Façade", "Rotating Floors", "BIM-Integrated"],
     credits: "Structural: Arup Barcelona · Façade: Permasteelisa · Developer: Inmobiliaria Catalana",
     spineColor: "#1E2D3D",
@@ -193,6 +292,24 @@ export const projects = [
     coverImage: "https://images.unsplash.com/photo-1593696140826-c58b021acf8b?w=900&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=900&q=80",
+    ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1593696140826-c58b021acf8b?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Detail Study",
+        rightHeading: "Tectonic Textures & Clay Systems",
+        rightBody: "The interior clay plaster is hand-troweled without sanders or chemical sealers, ensuring it remains porous and hyper-reactive to ambient humidity. Unpolished wood joinery details accumulate oils over generations, tracing a record of use.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
     ],
     technologies: ["Clay Plaster", "Hand-Thrown Ceramic", "Douglas Fir", "Passive Solar"],
     credits: "Ceramics: Mudlark Studio · Clay Plaster: Earth Building Co. · Photography: Jeremy Bittermann",
@@ -227,6 +344,24 @@ export const projects = [
     gallery: [
       "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=900&q=80",
     ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Spatial Concept",
+        rightHeading: "Subterranean Submergence",
+        rightBody: "The spatial volumes mimic an archeological excavation site. The overhead travertine vaults compress the acoustics of the water, creating a dense, ritualistic reverberation zone that heightens the auditory profile of the hot springs.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
+    ],
     technologies: ["Quartzite", "Travertine", "Thermal Engineering", "Bronze", "Spring Water"],
     credits: "Thermal Engineering: Bollinger+Grohmann · Stonemasons: Bündner Naturstein",
     spineColor: "#8B9B8A",
@@ -259,6 +394,24 @@ export const projects = [
     coverImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=900&q=80",
+    ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Detail Study",
+        rightHeading: "The Ash-Lined Luminary",
+        rightBody: "The main atrium serves as a central luminary engine. The pale, vertical ash planks line the reading niches, scattering high-frequency northern light uniformly into deep alcoves and completely eliminating glare on reading sheets.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
     ],
     technologies: ["Phosphate Steel", "Ash Timber", "Daylit Atrium", "Acoustic Engineering"],
     credits: "Acoustic: Müller-BBM · Library Consultant: Stichting Openbare Bibliotheek · Photography: Filip Dujardin",
@@ -295,6 +448,24 @@ export const projects = [
     gallery: [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80",
     ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Spatial Concept",
+        rightHeading: "Monolithic Shadow Enclosures",
+        rightBody: "The earth walls function as a thermal dampener, matching solar cycles perfectly. The massive physical profile of the block units cocoons the open interior, absorbing acoustic clutter and offering the painter an uncompromised spatial clean slate.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
+    ],
     technologies: ["Adobe", "Seismic-Reinforced Masonry", "Clerestory", "Passive Cooling"],
     credits: "Seismic Engineering: UNAM Faculty of Engineering · Builder: Constructora Zapoteca",
     spineColor: "#8B5E3C",
@@ -327,6 +498,24 @@ export const projects = [
     coverImage: "https://images.unsplash.com/photo-1551105378-78e609e1d468?w=900&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=900&q=80",
+    ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1551105378-78e609e1d468?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Material System",
+        rightHeading: "The Reclaimed Marquetry Skin",
+        rightBody: "Exposed historical limestone fragments mesh directly into custom inlaid walnut veneer. Rather than masking the historical physical wear, individual surface scars and mineral blooms across the wood are left plain to create an authentic tactile narrative.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
     ],
     technologies: ["Salvaged Marquetry", "Limestone", "Art Deco", "Adaptive Reuse"],
     credits: "Marquetry Restoration: Atelier Duchamp · FF&E: Maison de Crafts · Photography: Francis Amiand",
@@ -361,6 +550,24 @@ export const projects = [
     gallery: [
       "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&q=80",
     ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Technical Resolution",
+        rightHeading: "High-Tensile Cliff Anchors",
+        rightBody: "The massive cantilever performance rests on hidden rock anchor clusters drilled deep into structural granite. Pre-stressed tension systems offset live gravity loads, ensuring zero structural drift even during violent winter mountain gales.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
+    ],
     technologies: ["Laminated Glass", "Weathering Steel Cantilever", "Rock Bolt Anchoring", "Marine Construction"],
     credits: "Structural: Multiconsult AS · Client: Statens Vegvesen · Photography: Rasmus Norlander",
     spineColor: "#2A3540",
@@ -393,6 +600,24 @@ export const projects = [
     coverImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=900&q=80",
+    ],
+    spreads: [
+      {
+        leftImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80",
+        rightType: "intro",
+        pageNumLeft: "I",
+        pageNumRight: "II",
+      },
+      {
+        leftImage: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=900&q=80",
+        rightType: "gallery",
+        galleryIndex: 0,
+        rightLabel: "Material System",
+        rightHeading: "The Mud & Kiln Synthesis",
+        rightBody: "The earth-based units feature open, honeycomb-pattern brick bonding. These screens function as traditional mashrabiya lattices, fracturing intense direct sunlight into soft decorative tapestries while allowing continuous evening cross-breezes.",
+        pageNumLeft: "III",
+        pageNumRight: "IV",
+      },
     ],
     technologies: ["Terracotta Brick", "Wind Tower", "Evaporative Cooling", "Passive Architecture"],
     credits: "Passive Systems: Transsolar · Kiln: Alfares Santa Ana · Photography: Fernando Alda",
