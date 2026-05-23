@@ -1,42 +1,36 @@
 /**
- * useCinematicScroll.js
+ * useCinematicScroll.js  [Phase 4 — updated]
  * ─────────────────────────────────────────────────────────────────
- * Watches phase changes and calls lenis.stop() / lenis.start()
- * at exactly the right moment — preventing any scroll activity
- * during the cinematic experience, then releasing cleanly.
+ * Phase 4 change: uses selectors.shouldScrollBeLocked which now
+ * includes PHASE.HANDOFF in its lock set.
  *
- * This hook is mounted ONCE inside CinematicOrchestrator.
- * It must live below both LenisProvider and CinematicProvider.
+ * Lenis is started ONCE on COMPLETED and never stopped again by
+ * this hook — the scroll position is preserved at 0 because the
+ * website was locked throughout the cinematic.
+ *
+ * This file REPLACES the existing useCinematicScroll.js.
  * ─────────────────────────────────────────────────────────────────
  */
 import { useEffect, useRef } from "react";
-import { useLenis }     from "../../context/LenisContext.jsx";
-import { useCinematic } from "../state/CinematicContext.jsx";
-import { selectors }    from "../state/cinematicMachine.js";
+import { useCinematic }  from "../state/CinematicContext.jsx";
+import { PHASE, selectors } from "../state/cinematicMachine.js";
+import { useLenis }      from "../../context/LenisContext.jsx";
 
 export function useCinematicScroll() {
-  const { stop, start } = useLenis();
   const { phase }       = useCinematic();
-
-  // Track previous phase to detect the exact completed transition
-  const prevPhaseRef = useRef(phase);
+  const { stop, start } = useLenis();
+  const startedRef      = useRef(false);
 
   useEffect(() => {
-    const shouldLock = selectors.shouldScrollBeLocked(phase);
-
-    if (shouldLock) {
+    if (selectors.shouldScrollBeLocked(phase)) {
       stop();
-    } else {
-      // Arriving at `completed` — ensure window is at the very top
-      // before re-enabling so there's no jump to a random offset.
-      if (prevPhaseRef.current !== phase) {
-        // Use native scroll reset here (not lenis.scrollTo) to avoid
-        // the animated scroll conflicting with the unlock.
-        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      }
-      start();
+      startedRef.current = false;
+    } else if (phase === PHASE.COMPLETED && !startedRef.current) {
+      // Restore scroll exactly once — no jump, no position loss
+      // Small delay so Lenis initializes cleanly after overlay unmounts
+      startedRef.current = true;
+      const id = setTimeout(() => start(), 80);
+      return () => clearTimeout(id);
     }
-
-    prevPhaseRef.current = phase;
   }, [phase, stop, start]);
 }

@@ -1,15 +1,31 @@
 /**
- * cinematicMachine.js
+ * cinematicMachine.js  [Phase 4 — updated]
  * ─────────────────────────────────────────────────────────────────
- * Pure state machine (no React deps) for the cinematic experience.
+ * Phase 4 change:
+ *   • Adds HANDOFF_READY action and HANDOFF phase.
  *
- * Phase flow:
- *   loading ──► intro ──► locked ──► interior ──► completed
+ * Updated phase flow:
+ *   loading ──► intro ──► locked ──► interior ──► handoff ──► completed
  *
- * Rules:
- *  • Only valid transitions are allowed (invalid ones are no-ops).
- *  • Every state carries a `meta` bag for phase-specific metadata.
- *  • The reducer is a plain function — easy to unit-test.
+ * Why HANDOFF?
+ *   The interior slot's exit fade takes 1.2s. During that window the
+ *   cinematic overlay is fading to transparent, revealing the website
+ *   underneath. HomeSection needs to already be fully ready BEFORE
+ *   that fade begins — not after overlay unmounts.
+ *
+ *   HANDOFF fires as soon as the interior video's near-end threshold
+ *   is crossed (the same moment startExit() is called). HomeSection
+ *   listens to HANDOFF to know it should be fully composited on-screen.
+ *
+ *   In practice HomeSection renders interior-final.jpg at full opacity
+ *   at all times — it's just hidden under the z-index:100 overlay.
+ *   HANDOFF is therefore mostly a semantic signal for future use and
+ *   for any entrance typography/content animations.
+ *
+ *   COMPLETED is still what triggers overlay unmount (return null in
+ *   CinematicOrchestrator) and Lenis restoration.
+ *
+ * All Phase 1-3 transitions are PRESERVED EXACTLY.
  * ─────────────────────────────────────────────────────────────────
  */
 
@@ -19,17 +35,19 @@ export const PHASE = Object.freeze({
   INTRO:     "intro",
   LOCKED:    "locked",
   INTERIOR:  "interior",
+  HANDOFF:   "handoff",   // NEW — interior exit fade in progress
   COMPLETED: "completed",
 });
 
 // ── Action types ─────────────────────────────────────────────────
 export const ACTION = Object.freeze({
-  ASSETS_READY:      "ASSETS_READY",       // videos preloaded → loading → intro
-  INTRO_ENDED:       "INTRO_ENDED",        // intro video ended → intro → locked
-  LOCK_SOLVED:       "LOCK_SOLVED",        // pattern lock solved → locked → interior
-  INTERIOR_ENDED:    "INTERIOR_ENDED",     // interior video ended → interior → completed
-  FORCE_COMPLETE:    "FORCE_COMPLETE",     // escape hatch (skip / dev) → completed
-  SET_LOAD_PROGRESS: "SET_LOAD_PROGRESS",  // update preload %
+  ASSETS_READY:      "ASSETS_READY",
+  INTRO_ENDED:       "INTRO_ENDED",
+  LOCK_SOLVED:       "LOCK_SOLVED",
+  INTERIOR_ENDED:    "INTERIOR_ENDED",
+  HANDOFF_READY:     "HANDOFF_READY",    // NEW — interior near-end reached
+  FORCE_COMPLETE:    "FORCE_COMPLETE",
+  SET_LOAD_PROGRESS: "SET_LOAD_PROGRESS",
 });
 
 // ── Valid transitions ────────────────────────────────────────────
@@ -37,14 +55,15 @@ const TRANSITIONS = {
   [PHASE.LOADING]:   [ACTION.ASSETS_READY,   ACTION.FORCE_COMPLETE, ACTION.SET_LOAD_PROGRESS],
   [PHASE.INTRO]:     [ACTION.INTRO_ENDED,    ACTION.FORCE_COMPLETE],
   [PHASE.LOCKED]:    [ACTION.LOCK_SOLVED,    ACTION.FORCE_COMPLETE],
-  [PHASE.INTERIOR]:  [ACTION.INTERIOR_ENDED, ACTION.FORCE_COMPLETE],
-  [PHASE.COMPLETED]: [], // terminal — no transitions
+  [PHASE.INTERIOR]:  [ACTION.INTERIOR_ENDED, ACTION.HANDOFF_READY,  ACTION.FORCE_COMPLETE],
+  [PHASE.HANDOFF]:   [ACTION.INTERIOR_ENDED, ACTION.FORCE_COMPLETE],
+  [PHASE.COMPLETED]: [],
 };
 
 // ── Initial state ────────────────────────────────────────────────
 export const initialState = {
   phase:        PHASE.LOADING,
-  loadProgress: 0,       // 0–100
+  loadProgress: 0,
   meta: {},
 };
 
@@ -52,7 +71,6 @@ export const initialState = {
 export function cinematicReducer(state, action) {
   const allowed = TRANSITIONS[state.phase] ?? [];
 
-  // Guard: reject invalid transitions silently in production
   if (!allowed.includes(action.type)) {
     if (import.meta.env.DEV) {
       console.warn(
@@ -78,6 +96,10 @@ export function cinematicReducer(state, action) {
     case ACTION.LOCK_SOLVED:
       return { ...state, phase: PHASE.INTERIOR, meta: {} };
 
+    // NEW — interior video near-end: signal handoff before overlay disappears
+    case ACTION.HANDOFF_READY:
+      return { ...state, phase: PHASE.HANDOFF, meta: {} };
+
     case ACTION.INTERIOR_ENDED:
       return { ...state, phase: PHASE.COMPLETED, meta: {} };
 
@@ -90,16 +112,21 @@ export function cinematicReducer(state, action) {
 }
 
 // ── Selectors ────────────────────────────────────────────────────
-export const selectors = {
+export const selectors = Object.freeze({
   isOverlayVisible: (phase) =>
     phase !== PHASE.COMPLETED,
 
   shouldScrollBeLocked: (phase) =>
-    phase === PHASE.LOADING ||
+    phase === PHASE.LOADING  ||
     phase === PHASE.INTRO    ||
     phase === PHASE.LOCKED   ||
-    phase === PHASE.INTERIOR,
+    phase === PHASE.INTERIOR ||
+    phase === PHASE.HANDOFF,
 
   isVideoPhase: (phase) =>
-    phase === PHASE.INTRO || phase === PHASE.INTERIOR,
-};
+    phase === PHASE.INTRO || phase === PHASE.INTERIOR || phase === PHASE.HANDOFF,
+
+  // HomeSection uses this — true during HANDOFF + COMPLETED
+  isHandoffActive: (phase) =>
+    phase === PHASE.HANDOFF || phase === PHASE.COMPLETED,
+});

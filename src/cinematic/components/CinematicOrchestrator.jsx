@@ -1,17 +1,14 @@
 /**
- * CinematicOrchestrator.jsx  [Phase 2 — updated]
+ * CinematicOrchestrator.jsx  [Phase 4 — updated]
  * ─────────────────────────────────────────────────────────────────
- * Phase 1 architecture is preserved exactly.
- * Phase 2 changes:
- *   • Fixes the loading→intro handoff: the LoadingScreen animation
- *     and video preloading are now properly coordinated via two refs
- *     (`loadingAnimationDone`, `videosReady`) so ASSETS_READY only
- *     fires when BOTH conditions are satisfied — no race condition.
- *   • Passes the real videoRefs Map to the slot components so
- *     useAdoptVideo can move the live elements.
- *   • CinematicLoadingSlot, CinematicLockedSlot unchanged.
- *   • CinematicIntroSlot, CinematicInteriorSlot replaced by Phase 2
- *     implementations.
+ * Phase 4 changes:
+ *   • Passes onHandoff to CinematicInteriorSlot so it can dispatch
+ *     ACTION.HANDOFF_READY when the interior near-end is reached.
+ *   • PHASE.HANDOFF is still overlayVisible — the slot stays mounted
+ *     during the exit fade so we don't hard-cut.
+ *   • Overlay removed on PHASE.COMPLETED as before.
+ *
+ * All Phase 2 orchestration architecture PRESERVED EXACTLY.
  * ─────────────────────────────────────────────────────────────────
  */
 import { useEffect, useRef, useCallback } from "react";
@@ -25,13 +22,11 @@ import { CinematicIntroSlot }    from "./slots/CinematicIntroSlot.jsx";
 import { CinematicLockedSlot }   from "./slots/CinematicLockedSlot.jsx";
 import { CinematicInteriorSlot } from "./slots/CinematicInteriorSlot.jsx";
 
-// ── Video source registry ────────────────────────────────────────
 const VIDEO_SOURCES = [
   { id: "intro",    src: "/videos/intro.mp4"    },
   { id: "interior", src: "/videos/interior.mp4" },
 ];
 
-// ── Orchestrator ─────────────────────────────────────────────────
 export default function CinematicOrchestrator() {
   const { phase, loadProgress, dispatch } = useCinematic();
 
@@ -42,10 +37,6 @@ export default function CinematicOrchestrator() {
     { enabled: phase !== PHASE.COMPLETED }
   );
 
-  // ── Handoff coordination ─────────────────────────────────────────
-  // Both conditions must be true before ASSETS_READY fires:
-  //   loadingAnimDone — LoadingScreen exit animation completed
-  //   videosReady     — preloader has buffered enough to play
   const loadingAnimDone = useRef(false);
   const videosReady     = useRef(false);
 
@@ -55,7 +46,6 @@ export default function CinematicOrchestrator() {
     }
   }, [dispatch]);
 
-  // Watch isReady from preloader
   useEffect(() => {
     if (isReady && phase === PHASE.LOADING) {
       videosReady.current = true;
@@ -63,25 +53,20 @@ export default function CinematicOrchestrator() {
     }
   }, [isReady, phase, tryAdvance]);
 
-  // Dispatch progress updates
   useEffect(() => {
     if (phase === PHASE.LOADING) {
       dispatch({ type: ACTION.SET_LOAD_PROGRESS, payload: progress });
     }
   }, [progress, phase, dispatch]);
 
-  // Called by CinematicLoadingSlot when its exit animation ends
   const handleLoadingComplete = useCallback(() => {
     loadingAnimDone.current = true;
     tryAdvance();
   }, [tryAdvance]);
 
-  // Overlay removed when experience is complete
+  // Overlay fully removed when experience is complete
   if (phase === PHASE.COMPLETED) return null;
 
-  // ── Build stable videoRef objects for slot consumption ───────────
-  // These objects are stable per render — the Map itself is a ref.
-  // Slots access videoRefs.current.get(id) inside their own effects.
   const introVideoRef    = { current: videoRefs.current?.get("intro")    ?? null };
   const interiorVideoRef = { current: videoRefs.current?.get("interior") ?? null };
 
@@ -115,10 +100,12 @@ export default function CinematicOrchestrator() {
         />
       )}
 
-      {phase === PHASE.INTERIOR && (
+      {/* INTERIOR + HANDOFF: slot stays mounted during exit fade */}
+      {(phase === PHASE.INTERIOR || phase === PHASE.HANDOFF) && (
         <CinematicInteriorSlot
           videoRef={interiorVideoRef}
-          onEnded={() => dispatch({ type: ACTION.INTERIOR_ENDED })}
+          onHandoff={() => dispatch({ type: ACTION.HANDOFF_READY })}
+          onEnded={()  => dispatch({ type: ACTION.INTERIOR_ENDED })}
         />
       )}
     </div>

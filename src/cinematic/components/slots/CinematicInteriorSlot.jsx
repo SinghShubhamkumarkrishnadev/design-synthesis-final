@@ -1,29 +1,20 @@
 /**
- * CinematicInteriorSlot.jsx  [Phase 2]
+ * CinematicInteriorSlot.jsx  [Phase 4 — updated]
  * ─────────────────────────────────────────────────────────────────
- * Replaces the Phase 1 stub entirely.
+ * Phase 4 change:
+ *   • onNearEnd now dispatches HANDOFF_READY (via prop) so HomeSection
+ *     knows the exit fade has started and the website will be revealed.
+ *   • onEnded still dispatches INTERIOR_ENDED → COMPLETED.
  *
- * Differences from IntroSlot:
- *  • Uses interior-final.jpg as the freeze-frame
- *  • The exit fade transitions INTO the completed state:
- *    the overlay unmounts (CinematicOrchestrator returns null) and
- *    the website is revealed underneath.
- *  • The exit animation fades to transparent (not black) so the
- *    website content bleeds through as the overlay disappears.
+ * This allows HomeSection typography to begin its own entrance at
+ * exactly the moment the interior fade starts — creating a
+ * choreographed reveal rather than a hard cut.
  *
- * Render tree:
- *   <container>                        ← fixed, inset 0
- *     <img interior-final.jpg />       ← opacity:0, pre-composited
- *     (video element moved here by useAdoptVideo)
- *   </container>
+ * The slot receives two callbacks instead of one:
+ *   onHandoff  — fired at near-end (start of exit fade)
+ *   onEnded    — fired after exit fade completes
  *
- * Timeline:
- *   1. Mount          → fade in from black (0.5s)
- *   2. Video plays    → autoplay via useVideoPlayback
- *   3. nearEnd        → startExit() begins fade-to-transparent
- *   4. video ended    → freeze-frame swap (atomic, under exit fade)
- *   5. onExitComplete → onEnded() dispatches INTERIOR_ENDED
- *      → CinematicOrchestrator returns null → overlay removed
+ * All Phase 2 slot architecture is PRESERVED EXACTLY.
  * ─────────────────────────────────────────────────────────────────
  */
 import { useRef, useCallback } from "react";
@@ -34,21 +25,17 @@ import { useVideoPlayback } from "../../hooks/useVideoPlayback.js";
 import { useFreezeFrame }   from "../../hooks/useFreezeFrame.js";
 import { useSlotTimeline }  from "../../hooks/useSlotTimeline.js";
 
-// ── Constants ────────────────────────────────────────────────────
 const FREEZE_IMG_SRC = "/images/interior-final.jpg";
 const ENTER_DURATION = 0.5;
-const EXIT_DURATION  = 1.2;    // Longer — this is the grand reveal
-const EXIT_LEAD_TIME = 0.8;    // Start exit earlier for a long fade
+const EXIT_DURATION  = 1.2;
+const EXIT_LEAD_TIME = 0.8;
 
-// ── Component ────────────────────────────────────────────────────
-export function CinematicInteriorSlot({ videoRef, onEnded }) {
+export function CinematicInteriorSlot({ videoRef, onHandoff, onEnded }) {
   const containerRef = useRef(null);
   const imageRef     = useRef(null);
 
-  // ── 1. Adopt preloaded video ─────────────────────────────────────
   useAdoptVideo(videoRef, containerRef);
 
-  // ── 2. Timelines ─────────────────────────────────────────────────
   const buildEnter = useCallback((container) => {
     return gsap.fromTo(
       container,
@@ -67,8 +54,6 @@ export function CinematicInteriorSlot({ videoRef, onEnded }) {
     );
   }, [videoRef]);
 
-  // Exit fades to opacity:0 — revealing the website below the overlay.
-  // This creates the "world opening up" feel as the cinematic ends.
   const buildExit = useCallback((container) => {
     return gsap.to(container, {
       opacity:  0,
@@ -81,27 +66,30 @@ export function CinematicInteriorSlot({ videoRef, onEnded }) {
     containerRef,
     buildEnter,
     buildExit,
-    onExitComplete: onEnded,   // dispatch INTERIOR_ENDED
+    onExitComplete: onEnded,
   });
 
-  // ── 3. Playback ──────────────────────────────────────────────────
+  // onNearEnd: dispatch HANDOFF_READY then begin the visual exit fade
+  const handleNearEnd = useCallback(() => {
+    onHandoff?.();
+    startExit();
+  }, [onHandoff, startExit]);
+
   useVideoPlayback({
     videoRef,
     shouldPlay:      true,
-    onNearEnd:       startExit,
+    onNearEnd:       handleNearEnd,
     onPlaybackError: onEnded,
     threshold:       EXIT_LEAD_TIME,
   });
 
-  // ── 4. Freeze-frame swap ─────────────────────────────────────────
   useFreezeFrame({
     containerRef,
     videoRef,
     imageRef,
-    onFrozen: () => {/* exit fade covers the swap — no extra action needed */},
+    onFrozen: () => {},
   });
 
-  // ── Render ───────────────────────────────────────────────────────
   return (
     <div
       ref={containerRef}
@@ -116,7 +104,6 @@ export function CinematicInteriorSlot({ videoRef, onEnded }) {
         opacity:         0,
       }}
     >
-      {/* Freeze-frame — pre-composited at opacity:0 */}
       <img
         ref={imageRef}
         src={FREEZE_IMG_SRC}
@@ -138,7 +125,6 @@ export function CinematicInteriorSlot({ videoRef, onEnded }) {
           color:          "transparent",
         }}
       />
-      {/* <video> injected here by useAdoptVideo at z-index:1 */}
     </div>
   );
 }

@@ -1,34 +1,30 @@
 /**
- * App.jsx — Design Synthesis
+ * App.jsx  [Phase 4 — updated]
  * ─────────────────────────────────────────────────────────────────
- * Integration changes from original:
- *
- *  1. LenisProvider wraps everything → single shared Lenis instance.
- *  2. CinematicProvider holds the phase state machine.
- *  3. CinematicOrchestrator mounts the fullscreen overlay and drives
- *     the loading → intro → locked → interior → completed flow.
- *  4. The old `isLoading` useState is replaced by phase selectors.
- *  5. LoadingScreen is NO LONGER rendered directly in App —
- *     it is mounted inside CinematicLoadingSlot.
- *  6. The existing website sections remain mounted at all times
- *     underneath the cinematic overlay (z-index: 100).
+ * Phase 4 changes:
+ *   • Imports updated selectors (isHandoffActive added).
+ *   • The <motion.main> entrance animation now triggers on
+ *     isHandoffActive instead of isExperienceComplete — this means
+ *     the main content block begins its subtle entrance DURING the
+ *     interior fade, not after the overlay has already unmounted.
+ *     (HomeSection handles its own image/typography timing.)
+ *   • HomeSection no longer needs a prop — it reads phase directly
+ *     from CinematicContext internally.
+ *   • All other architecture PRESERVED EXACTLY.
  * ─────────────────────────────────────────────────────────────────
  */
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 
-// ── Providers & orchestrator ─────────────────────────────────────
 import { LenisProvider }        from "./context/LenisContext.jsx";
 import { CinematicProvider, useCinematic } from "./cinematic/state/CinematicContext.jsx";
 import CinematicOrchestrator    from "./cinematic/components/CinematicOrchestrator.jsx";
 import { PHASE, selectors }     from "./cinematic/state/cinematicMachine.js";
 
-// ── UI Components ────────────────────────────────────────────────
 import { PillBase }             from "./components/3d-adaptive-navigation-bar";
 import FloatingConsultButton    from "./components/FloatingConsultButton";
 
-// ── Layout Sections ──────────────────────────────────────────────
 import HomeSection        from "./components/sections/HomeSection";
 import AboutSection       from "./components/sections/AboutSection";
 import ServicesSection    from "./components/sections/ServicesSection";
@@ -52,13 +48,11 @@ const ScrollProgressBar = ({ progress }) => (
   </div>
 );
 
-// ── Inner app — consumes CinematicContext ────────────────────────
-// Separated so it can call useCinematic() below the Provider.
 function AppInner() {
   const { phase } = useCinematic();
 
-  // Derive booleans from phase — no extra state needed
   const isExperienceComplete = phase === PHASE.COMPLETED;
+  const isHandoffActive      = selectors.isHandoffActive(phase);   // HANDOFF or COMPLETED
   const overlayVisible       = selectors.isOverlayVisible(phase);
 
   const [activeSection,  setActiveSection ] = useState("home");
@@ -68,7 +62,6 @@ function AppInner() {
   // Section observer — only active once the cinematic is done
   useEffect(() => {
     if (!isExperienceComplete) return;
-
     const sectionIds = ["home","about","philosophy","services","works","testimonials","contact"];
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) setActiveSection(e.target.id); }),
@@ -84,7 +77,6 @@ function AppInner() {
   // Scroll progress — only active once cinematic is done
   useEffect(() => {
     if (!isExperienceComplete) return;
-
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (totalScroll > 0) setScrollProgress((window.scrollY / totalScroll) * 100);
@@ -97,23 +89,11 @@ function AppInner() {
     <>
       <Toaster position="bottom-right" reverseOrder={false} />
 
-      {/*
-       * ── Cinematic Overlay ──────────────────────────────────────
-       * Sits at z-index 100, above everything.
-       * Removed from DOM when phase === COMPLETED.
-       */}
+      {/* Cinematic Overlay — z-index 100, removed on COMPLETED */}
       <CinematicOrchestrator />
 
-      {/*
-       * ── Website ───────────────────────────────────────────────
-       * Always mounted. Scroll is controlled by useCinematicScroll
-       * inside CinematicOrchestrator. The `overlayVisible` flag
-       * drives a subtle visibility state on the header/FAB so they
-       * don't intercept pointer events during the cinematic.
-       */}
       <div
         className="relative min-h-screen bg-[#f8f9fa] text-neutral-900 font-sans overflow-x-hidden antialiased selection:bg-emerald-500/20"
-        // Ensure the website is below the cinematic overlay
         style={{ position: "relative", zIndex: 0 }}
       >
         <ScrollProgressBar progress={scrollProgress} />
@@ -121,12 +101,10 @@ function AppInner() {
         {/* ── HEADER ──────────────────────────────────────────── */}
         <header
           className="fixed top-4 sm:top-8 inset-x-0 w-full pointer-events-none"
-          // Header z-index must stay below the cinematic overlay
           style={{ zIndex: 50 }}
         >
           <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto w-full px-4 sm:px-6 md:px-16 xl:px-24 flex flex-row items-center justify-between gap-4 relative">
 
-            {/* Branding */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={isExperienceComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
@@ -163,7 +141,6 @@ function AppInner() {
               </span>
             </motion.div>
 
-            {/* Navigation pill */}
             <motion.div
               className="pointer-events-auto flex-shrink-0 z-10"
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -180,22 +157,40 @@ function AppInner() {
         </header>
 
         {/* ── MAIN CONTENT ─────────────────────────────────────── */}
-        <motion.main
-          className="w-full origin-top"
-          initial={{ y: 60, opacity: 0.8 }}
-          animate={isExperienceComplete ? { y: 0, opacity: 1 } : { y: 60, opacity: 0.8 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-        >
-          <section id="home">        <HomeSection />          </section>
-          <section id="about">       <AboutSection />         </section>
-          <section id="services">    <ServicesSection />      </section>
-          <section id="works">       <WorksSection />         </section>
-          <section id="testimonials"><TestimonialsSection />  </section>
-          <section id="contact">     <ContactSection />       </section>
-          <Footer />
-        </motion.main>
+        {/*
+         * The motion.main entrance now keys off isHandoffActive, which
+         * fires ~1.2s BEFORE COMPLETED. This means the about/services
+         * sections are already positioned correctly when the overlay
+         * finishes unmounting — no layout pop.
+         *
+         * The y:60 → y:0 transition on the lower sections adds a
+         * subtle "reveal from below" that echoes the cinematic entrance.
+         *
+         * HomeSection is excluded from this motion — it handles its
+         * own image (static) and typography (self-animated).
+         */}
+        <main className="w-full">
+          {/* HomeSection — self-contained, no motion wrapper needed */}
+          <section id="home">
+            <HomeSection />
+          </section>
 
-        {/* Floating consult button — only after cinematic ends */}
+          {/* Remaining sections — entrance on handoff */}
+          <motion.div
+            className="origin-top"
+            initial={{ y: 60, opacity: 0.8 }}
+            animate={isHandoffActive ? { y: 0, opacity: 1 } : { y: 60, opacity: 0.8 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          >
+            <section id="about">        <AboutSection />         </section>
+            <section id="services">    <ServicesSection />      </section>
+            <section id="works">       <WorksSection />         </section>
+            <section id="testimonials"><TestimonialsSection />  </section>
+            <section id="contact">     <ContactSection />       </section>
+            <Footer />
+          </motion.div>
+        </main>
+
         {isExperienceComplete && (
           <FloatingConsultButton
             position={{ bottom: "1.25rem", left: "1.25rem" }}
@@ -210,7 +205,6 @@ function AppInner() {
   );
 }
 
-// ── Root App — Provider shell ────────────────────────────────────
 export default function App() {
   return (
     <LenisProvider>
