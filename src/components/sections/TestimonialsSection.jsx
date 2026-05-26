@@ -519,7 +519,7 @@ export default function TestimonialsSection() {
     <section
       className="w-full py-16 sm:py-24 lg:py-32 flex flex-col items-center justify-center overflow-hidden relative"
       style={{
-        background:   "#e2e7e2ee",
+        background:   "#f3f6f3",
         borderTop:    `1px solid ${TOKEN.forestBorder}`,
         borderBottom: `1px solid ${TOKEN.forestBorder}`,
       }}

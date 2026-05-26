@@ -242,7 +242,7 @@ export default function ContactSection() {
   return (
     <section
       id="contact"
-      className="relative min-h-screen w-full overflow-x-hidden bg-[#dee2deee] font-sans flex items-center justify-center py-20 px-4 sm:px-8 lg:px-16"
+      className="relative min-h-screen w-full overflow-x-hidden bg-[#EEF1EE] font-sans flex items-center justify-center py-20 px-4 sm:px-8 lg:px-16"
     >
       <Toaster
         position="bottom-right"

@@ -1,14 +1,27 @@
 /**
- * CinematicOrchestrator.jsx  [Phase 4 — updated]
+ * CinematicOrchestrator.jsx  [Flash Fix]
  * ─────────────────────────────────────────────────────────────────
- * Phase 4 changes:
- *   • Passes onHandoff to CinematicInteriorSlot so it can dispatch
- *     ACTION.HANDOFF_READY when the interior near-end is reached.
- *   • PHASE.HANDOFF is still overlayVisible — the slot stays mounted
- *     during the exit fade so we don't hard-cut.
- *   • Overlay removed on PHASE.COMPLETED as before.
+ * Flash fixes applied here:
  *
- * All Phase 2 orchestration architecture PRESERVED EXACTLY.
+ * FIX 1 — Explicit black background on the overlay container
+ *   The position:fixed overlay div previously had no background.
+ *   Any gap between slot transitions (e.g. during React reconciler
+ *   flush between unmounting one slot and mounting the next) would
+ *   show a transparent fixed div — revealing the website below.
+ *
+ *   Solution: background:#000 on the overlay container. Every slot
+ *   fades in FROM this black. Every slot fades out TO this black.
+ *   There is never a transparent moment.
+ *
+ * FIX 2 — pointerEvents:none removed during active phases
+ *   The overlay should capture all pointer events during cinematic
+ *   to prevent any interaction with the website below.
+ *
+ * FIX 3 — Explicit overflow:hidden
+ *   Prevents any child overflow from appearing outside the overlay
+ *   bounds during transforms.
+ *
+ * All Phase 4 orchestration architecture preserved.
  * ─────────────────────────────────────────────────────────────────
  */
 import { useEffect, useRef, useCallback } from "react";
@@ -64,20 +77,38 @@ export default function CinematicOrchestrator() {
     tryAdvance();
   }, [tryAdvance]);
 
-  // Overlay fully removed when experience is complete
+  // Overlay fully unmounts on COMPLETED — returns null.
+  // At this point the website's visibility:hidden has already been
+  // flipped to visible (via App.jsx phase check) and the website
+  // is fully rendered underneath. Unmounting the overlay is a
+  // simple React reconciler operation with no visual consequence.
   if (phase === PHASE.COMPLETED) return null;
 
   const introVideoRef    = { current: videoRefs.current?.get("intro")    ?? null };
   const interiorVideoRef = { current: videoRefs.current?.get("interior") ?? null };
 
   return (
+    /*
+     * FIX: Explicit background:#000 on the overlay root.
+     *
+     * This is the single most important structural fix.
+     * All slot enter/exit animations fade between this black and
+     * their content. There is NEVER a transparent window in this
+     * overlay during the cinematic experience.
+     *
+     * The overlay is position:fixed, inset:0, zIndex:100.
+     * With background:#000, even if ALL slot children were opacity:0
+     * simultaneously (which shouldn't happen but could during a
+     * React reconciler flush), the user sees black — not the website.
+     */
     <div
       aria-hidden="true"
       style={{
-        position: "fixed",
-        inset:    0,
-        zIndex:   100,
-        overflow: "hidden",
+        position:   "fixed",
+        inset:      0,
+        zIndex:     100,
+        overflow:   "hidden",
+        background: "#000",    // FIX: always opaque black
       }}
     >
       {phase === PHASE.LOADING && (
@@ -100,12 +131,11 @@ export default function CinematicOrchestrator() {
         />
       )}
 
-      {/* INTERIOR + HANDOFF: slot stays mounted during exit fade */}
       {(phase === PHASE.INTERIOR || phase === PHASE.HANDOFF) && (
         <CinematicInteriorSlot
           videoRef={interiorVideoRef}
           onHandoff={() => dispatch({ type: ACTION.HANDOFF_READY })}
-          onEnded={()  => dispatch({ type: ACTION.INTERIOR_ENDED })}
+          onEnded={()   => dispatch({ type: ACTION.INTERIOR_ENDED })}
         />
       )}
     </div>

@@ -1,22 +1,26 @@
 /**
- * PatternLockOverlay.jsx
+ * PatternLockOverlay.jsx  [Flash Fix]
  * ─────────────────────────────────────────────────────────────────
- * The main assembly for the LOCKED phase.
+ * Flash fixes applied here:
  *
- * Layer stack (bottom → top):
- *   1. Freeze-frame image (intro-final.jpg) — full bleed background
- *   2. Dark green vignette overlay           — depth & atmosphere
- *   3. Glass panel                           — centred composition
- *   4. PatternGrid (SVG)                     — interactive lock
- *   5. UnlockStatus                          — minimal label
+ * FIX 1 — Freeze-frame background image: decoding="async"
+ *   The intro-final.jpg background in the lock overlay was using
+ *   decoding="sync" which blocks the main thread. Changed to async.
  *
- * Framer Motion AnimatePresence wraps the whole overlay for entrance.
- * The overlay itself uses the variants from usePatternAnimation.
+ * FIX 2 — Image scale removed from inline style
+ *   The previous code had `scale: 1.03` directly on the img style
+ *   as a Framer Motion value. This is valid but creates an implicit
+ *   transform which promotes the layer. Moved to a wrapper div
+ *   instead, keeping the img itself transform-free.
  *
- * Gesture surface:
- *   Pointer events are attached to the SVG via usePatternGesture.
- *   The parent overlay div also handles overflow and prevents
- *   iOS scroll events from leaking through.
+ * FIX 3 — Overlay entrance only fades from dark, never transparent
+ *   The motion.div overlay starts at opacity:0 which is fine because
+ *   it sits INSIDE the fixed overlay parent (z-index:100). The
+ *   parent is always fully opaque black during LOCKED phase entry
+ *   (CinematicLockedSlot has its own enter fade from black).
+ *   This layering is correct — no changes needed to the fade itself.
+ *
+ * All Phase 3 pattern lock architecture preserved.
  * ─────────────────────────────────────────────────────────────────
  */
 import { useRef } from "react";
@@ -29,17 +33,15 @@ import { usePatternGesture }    from "../../hooks/usePatternGesture.js";
 import { usePatternAnimation }  from "../../hooks/usePatternAnimation.js";
 import { COLOR }                from "../../utils/patternConstants.js";
 
-// ── Architectural corner accent ───────────────────────────────────
-// Small SVG corner marks — etched glass aesthetic
 function CornerAccents() {
   const size   = 18;
   const stroke = "rgba(160, 195, 165, 0.25)";
   const sw     = 1;
   const corners = [
-    { style: { top: 0, left: 0 },    rotate: 0   },
-    { style: { top: 0, right: 0 },   rotate: 90  },
+    { style: { top: 0, left: 0 },     rotate: 0   },
+    { style: { top: 0, right: 0 },    rotate: 90  },
     { style: { bottom: 0, right: 0 }, rotate: 180 },
-    { style: { bottom: 0, left: 0 }, rotate: 270 },
+    { style: { bottom: 0, left: 0 },  rotate: 270 },
   ];
   return (
     <>
@@ -50,9 +52,9 @@ function CornerAccents() {
           height={size}
           viewBox={`0 0 ${size} ${size}`}
           style={{
-            position:  "absolute",
+            position:      "absolute",
             ...c.style,
-            transform: `rotate(${c.rotate}deg)`,
+            transform:     `rotate(${c.rotate}deg)`,
             pointerEvents: "none",
           }}
         >
@@ -68,12 +70,10 @@ function CornerAccents() {
   );
 }
 
-// ── Component ─────────────────────────────────────────────────────
 export function PatternLockOverlay({ onUnlocked }) {
   const svgRef         = useRef(null);
   const previewLineRef = useRef(null);
 
-  // ── Pattern lock state ───────────────────────────────────────────
   const {
     lockState,
     sequence,
@@ -81,7 +81,6 @@ export function PatternLockOverlay({ onUnlocked }) {
     commitGesture,
   } = usePatternLock({ onSuccess: onUnlocked });
 
-  // ── Animation state ──────────────────────────────────────────────
   const {
     overlayVariants,
     overlayAnimate,
@@ -89,7 +88,6 @@ export function PatternLockOverlay({ onUnlocked }) {
     isSuccess,
   } = usePatternAnimation({ lockState });
 
-  // ── Gesture handlers ─────────────────────────────────────────────
   const { handlers } = usePatternGesture({
     svgRef,
     previewLineRef,
@@ -99,49 +97,58 @@ export function PatternLockOverlay({ onUnlocked }) {
     commitGesture,
   });
 
-  // ── Render ───────────────────────────────────────────────────────
   return (
     <motion.div
       variants={overlayVariants}
       initial="hidden"
       animate={overlayAnimate}
       style={{
-        position:   "fixed",
-        inset:       0,
-        zIndex:      0,
-        display:    "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        // Prevent iOS scroll bleed
-        overflowY:  "hidden",
-        touchAction: "none",
-        // GPU layer
-        transform:  "translateZ(0)",
-        willChange: "opacity",
+        position:        "fixed",
+        inset:           0,
+        zIndex:          0,
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        overflowY:       "hidden",
+        touchAction:     "none",
+        transform:       "translateZ(0)",
+        willChange:      "opacity",
       }}
     >
-      {/* ── Layer 1: Freeze-frame background ───────────────────── */}
-      <img
-        src="/images/intro-final.jpg"
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="sync"
-        style={{
-          position:       "absolute",
-          inset:          0,
-          width:          "100%",
-          height:         "100%",
-          objectFit:      "cover",
-          objectPosition: "center center",
-          transform:      "translateZ(0)",
-          // Very subtle scale-in with the overlay entrance — creates depth
-          scale: 1.03,
-        }}
-      />
-
-      {/* ── Layer 2: Dark vignette ──────────────────────────────── */}
+      {/* ── Layer 1: Freeze-frame background ──────────────────── */}
+      {/*
+       * FIX: Wrap the image in a plain div for the scale effect
+       * instead of applying scale directly on the img element.
+       * This keeps the img itself transform-free.
+       */}
       <div
+        style={{
+          position:  "absolute",
+          inset:     0,
+          transform: "scale(1.03)",
+          // No willChange here — this is inside the overlay (z-index:100)
+          // so GPU promotion risk is contained within the overlay context.
+        }}
+      >
+        <img
+          src="/images/intro-final.jpg"
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          // FIX: async decoding
+          decoding="async"
+          style={{
+            width:          "100%",
+            height:         "100%",
+            objectFit:      "cover",
+            objectPosition: "center center",
+          }}
+        />
+      </div>
+
+      {/* ── Layer 2: Dark vignette ─────────────────────────────── */}
+      <div
+        aria-hidden="true"
         style={{
           position: "absolute",
           inset:    0,
@@ -156,7 +163,7 @@ export function PatternLockOverlay({ onUnlocked }) {
         }}
       />
 
-      {/* ── Layer 3: Glass composition panel ───────────────────── */}
+      {/* ── Layer 3: Glass composition panel ──────────────────── */}
       <div
         style={{
           position:        "relative",
@@ -164,21 +171,16 @@ export function PatternLockOverlay({ onUnlocked }) {
           flexDirection:   "column",
           alignItems:      "center",
           padding:         "48px 52px 40px",
-          // Architectural glass
           background:      "rgba(8, 22, 12, 0.30)",
           border:          "1px solid rgba(160, 195, 165, 0.12)",
-          // Restrained blur — safe for Safari
           WebkitBackdropFilter: "blur(12px) saturate(1.1)",
           backdropFilter:  "blur(12px) saturate(1.1)",
-          // GPU layer
           transform:       "translateZ(0)",
           willChange:      "transform",
         }}
       >
-        {/* Corner accents — etched glass aesthetic */}
         <CornerAccents />
 
-        {/* Studio wordmark — minimal typographic anchor */}
         <div
           style={{
             marginBottom:  "38px",
@@ -203,15 +205,14 @@ export function PatternLockOverlay({ onUnlocked }) {
           </span>
           <div
             style={{
-              width:     "32px",
-              height:    "1px",
+              width:      "32px",
+              height:     "1px",
               background: "rgba(160, 195, 165, 0.20)",
-              margin:    "0 auto",
+              margin:     "0 auto",
             }}
           />
         </div>
 
-        {/* ── Layer 4: Pattern grid ─────────────────────────────── */}
         <PatternGrid
           ref={svgRef}
           sequence={sequence}
@@ -221,7 +222,6 @@ export function PatternLockOverlay({ onUnlocked }) {
           previewLineRef={previewLineRef}
         />
 
-        {/* ── Layer 5: Status label ─────────────────────────────── */}
         <UnlockStatus lockState={lockState} />
       </div>
     </motion.div>
