@@ -207,7 +207,7 @@ export default function HomeSection() {
          * the moment the overlay reaches opacity:0 is seamless.
          */}
         <img
-          src="/images/interior-final.jpg"
+          src="/images/interior-final.webp"
           alt="Design Synthesis — architectural interior"
           loading="eager"
           decoding="async"

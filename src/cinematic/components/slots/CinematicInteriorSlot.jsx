@@ -33,7 +33,7 @@ import { useVideoPlayback } from "../../hooks/useVideoPlayback.js";
 import { useFreezeFrame }   from "../../hooks/useFreezeFrame.js";
 import { useSlotTimeline }  from "../../hooks/useSlotTimeline.js";
 
-const FREEZE_IMG_SRC = "/images/interior-final.jpg";
+const FREEZE_IMG_SRC = "/images/interior-final.webp";
 const ENTER_DURATION = 0.5;
 const EXIT_DURATION  = 1.2;
 const EXIT_LEAD_TIME = 0.8;

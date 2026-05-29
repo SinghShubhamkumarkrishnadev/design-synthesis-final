@@ -111,7 +111,6 @@ export default function WorksSection() {
           className="works-section__info-col"
           aria-label="Archive information"
         >
-          <InteractionHint />
           <StatBlock />
         </aside>
       </div>
@@ -176,27 +175,6 @@ function DecoLines() {
         <circle cx="220" cy="258" r="1"   fill="#2D7356" opacity="0.22" />
         <circle cx="310" cy="280" r="1.2" fill="#1B4835" opacity="0.24" />
       </svg>
-    </div>
-  );
-}
-
-// ── Interaction hint card ─────────────────────────────────────────────────────
-function InteractionHint() {
-  return (
-    <div className="info-hint">
-      <div className="info-hint__icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="8" stroke="currentColor" strokeWidth="1.2" />
-          <path d="M9 5.5v4M9 11.5v.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-        </svg>
-      </div>
-      <div>
-        <p className="info-hint__lead">Click a book to extract it</p>
-        <p className="info-hint__body">
-          Each spine represents a completed project. Select one to bring it
-          forward and reveal its full story.
-        </p>
-      </div>
     </div>
   );
 }
