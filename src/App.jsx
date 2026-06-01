@@ -1,17 +1,12 @@
-//   App.jsx
+// App.jsx
 
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 
-import { LenisProvider } from "./context/LenisContext.jsx";
-import {
-  CinematicProvider,
-  useCinematic,
-} from "./cinematic/state/CinematicContext.jsx";
-import CinematicOrchestrator from "./cinematic/components/CinematicOrchestrator.jsx";
-import { PHASE, selectors } from "./cinematic/state/cinematicMachine.js";
+import { LenisProvider, useLenis } from "./context/LenisContext.jsx";
 
+import LoadingScreen from "./components/LoadingScreen";
 import { PillBase } from "./components/3d-adaptive-navigation-bar";
 import FloatingConsultButton from "./components/FloatingConsultButton";
 
@@ -40,28 +35,34 @@ const ScrollProgressBar = ({ progress }) => (
   </div>
 );
 
+// ── Inner app — needs access to useLenis so must live inside LenisProvider ──
 function AppInner() {
-  const { phase } = useCinematic();
+  const { stop, start } = useLenis();
 
-  const isExperienceComplete = phase === PHASE.COMPLETED;
-  const isHandoffActive = selectors.isHandoffActive(phase);
-
+  const [isLoaded, setIsLoaded] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isNavExpanded, setIsNavExpanded] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // NOTE: "faq" is intentionally excluded from sectionIds so it never
-  // appears as the active nav item and the navbar won't link to it.
+  // ── FIX: Freeze scroll during loading screen, resume when done ──
   useEffect(() => {
-    if (!isExperienceComplete) return;
-    const sectionIds = [
-      "home",
-      "about",
-      "services",
-      "works",
-      "testimonials",
-      "contact",
-    ];
+    // Block scroll immediately (loading screen is showing)
+    stop();
+  }, [stop]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      // Unlock scroll as soon as the loading screen finishes
+      start();
+    }
+  }, [isLoaded, start]);
+
+  // Track active section via IntersectionObserver after load completes
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const sectionIds = ["home", "about", "services", "works", "testimonials", "contact"];
+
     const observer = new IntersectionObserver(
       (entries) =>
         entries.forEach((e) => {
@@ -69,36 +70,38 @@ function AppInner() {
         }),
       { root: null, rootMargin: "-30% 0px -60% 0px", threshold: 0 },
     );
+
     sectionIds.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
-    return () => observer.disconnect();
-  }, [isExperienceComplete]);
 
+    return () => observer.disconnect();
+  }, [isLoaded]);
+
+  // Track scroll progress for the progress bar
   useEffect(() => {
-    if (!isExperienceComplete) return;
+    if (!isLoaded) return;
+
     const handleScroll = () => {
-      const totalScroll =
-        document.documentElement.scrollHeight - window.innerHeight;
+      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (totalScroll > 0)
         setScrollProgress((window.scrollY / totalScroll) * 100);
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isExperienceComplete]);
+  }, [isLoaded]);
 
   return (
     <>
       <Toaster position="bottom-right" reverseOrder={false} />
 
-      <CinematicOrchestrator />
+      {!isLoaded && <LoadingScreen onComplete={() => setIsLoaded(true)} />}
 
       <div
         className="relative min-h-screen bg-[#050d07] text-neutral-900 font-sans overflow-x-hidden antialiased selection:bg-emerald-500/20"
-        style={{
-          visibility: isExperienceComplete ? "visible" : "hidden",
-        }}
+        style={{ visibility: isLoaded ? "visible" : "hidden" }}
       >
         <ScrollProgressBar progress={scrollProgress} />
 
@@ -108,19 +111,15 @@ function AppInner() {
           style={{ zIndex: 50 }}
         >
           <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto w-full px-4 sm:px-6 md:px-16 xl:px-24 flex flex-row items-center justify-between gap-4 relative">
+
+            {/* Logo */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
-              animate={
-                isExperienceComplete
-                  ? { opacity: 1, y: 0 }
-                  : { opacity: 0, y: -20 }
-              }
+              animate={isLoaded ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
               className="flex items-center gap-2 sm:gap-3 pointer-events-auto select-none group cursor-pointer"
               onClick={() => {
-                document
-                  .getElementById("home")
-                  ?.scrollIntoView({ behavior: "smooth" });
+                document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
                 setActiveSection("home");
               }}
             >
@@ -150,19 +149,12 @@ function AppInner() {
               </span>
             </motion.div>
 
+            {/* Navigation pill */}
             <motion.div
               className="pointer-events-auto flex-shrink-0 z-10"
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={
-                isExperienceComplete
-                  ? { opacity: 1, scale: 1, y: 0 }
-                  : { opacity: 0, scale: 0.95, y: -10 }
-              }
-              transition={{
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1],
-                delay: 0.3,
-              }}
+              animate={isLoaded ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
             >
               <PillBase
                 activeSection={activeSection}
@@ -174,43 +166,26 @@ function AppInner() {
         </header>
 
         <main className="w-full">
-          {/* HomeSection — directly inside main, no wrapper animation */}
           <section id="home">
-            <HomeSection />
+            <HomeSection isLoaded={isLoaded} />
           </section>
 
           <motion.div
             initial={{ y: 40, opacity: 0 }}
-            animate={
-              isExperienceComplete
-                ? { y: 0, opacity: 1 }
-                : { y: 40, opacity: 0 }
-            }
+            animate={isLoaded ? { y: 0, opacity: 1 } : { y: 40, opacity: 0 }}
             transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
           >
-            <section id="about">
-              <AboutSection />
-            </section>
-            <section id="services">
-              <ServicesSection />
-            </section>
-            <section id="works">
-              <WorksSection />
-            </section>
-            <section id="testimonials">
-              <TestimonialsSection />
-            </section>
-
+            <section id="about"><AboutSection /></section>
+            <section id="services"><ServicesSection /></section>
+            <section id="works"><WorksSection /></section>
+            <section id="testimonials"><TestimonialsSection /></section>
             <FAQSection />
-
-            <section id="contact">
-              <ContactSection />
-            </section>
+            <section id="contact"><ContactSection /></section>
             <Footer />
           </motion.div>
         </main>
 
-        {isExperienceComplete && (
+        {isLoaded && (
           <FloatingConsultButton
             position={{ bottom: "1.25rem", left: "1.25rem" }}
             revolvingText="FREE 30 MINUTES • CONSULT • "
@@ -224,12 +199,11 @@ function AppInner() {
   );
 }
 
+// ── Root — LenisProvider wraps everything so AppInner can use useLenis ──
 export default function App() {
   return (
     <LenisProvider>
-      <CinematicProvider>
-        <AppInner />
-      </CinematicProvider>
+      <AppInner />
     </LenisProvider>
   );
 }

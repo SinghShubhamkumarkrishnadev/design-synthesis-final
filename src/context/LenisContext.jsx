@@ -4,17 +4,15 @@
  * Single Lenis instance shared across the whole app.
  *
  * Exposes:
- *   lenis       — raw Lenis instance (for edge-cases)
+ *   lenis       — raw Lenis instance ref (for edge-cases)
  *   scrollTo()  — programmatic scroll
  *   stop()      — freeze scroll (no jump, no layout shift)
  *   start()     — resume scroll (restores exact position)
  *
- * Design decisions:
- *  • Lenis is created ONCE inside the provider — never re-created.
- *  • stop/start are ref-stable (wrapped in useCallback with [] deps).
- *  • The rAF ticker is cleaned up on unmount to prevent memory leaks.
- *  • index.css removes html { scroll-behavior: smooth } to avoid
- *    conflict with Lenis; that comment is included below.
+ * FIX: Previously lenis.stop() was called on init and start() was
+ * never called after the loading screen finished — this completely
+ * blocked all scrolling. Now Lenis starts running immediately; App
+ * calls stop() during loading and start() once isLoaded is true.
  * ─────────────────────────────────────────────────────────────────
  */
 import {
@@ -37,25 +35,23 @@ export function LenisProvider({ children }) {
   // Initialise Lenis once on mount
   useEffect(() => {
     const lenis = new Lenis({
-      duration:   1.2,
-      easing:     (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration:    1.2,
+      easing:      (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      // NOTE: if you use Lenis 2.x the option is `smoothTouch`
       smoothTouch: false,
     });
 
     lenisRef.current = lenis;
 
-    // rAF ticker
+    // rAF ticker — keep Lenis running every frame
     function raf(time) {
       lenis.raf(time);
       rafRef.current = requestAnimationFrame(raf);
     }
     rafRef.current = requestAnimationFrame(raf);
 
-    // Start stopped — CinematicOrchestrator will call start() at the
-    // right phase transition so there's zero scroll during loading.
-    lenis.stop();
+    // Do NOT call lenis.stop() here.
+    // App.jsx will call stop() immediately and start() once loaded.
 
     return () => {
       cancelAnimationFrame(rafRef.current);
@@ -79,7 +75,6 @@ export function LenisProvider({ children }) {
 
   const value = useMemo(
     () => ({ lenis: lenisRef, stop, start, scrollTo }),
-    // lenisRef is a ref — stable; stop/start/scrollTo are stable callbacks
     [stop, start, scrollTo]
   );
 
@@ -98,15 +93,3 @@ export function useLenis() {
   }
   return ctx;
 }
-
-/*
- * IMPORTANT — remove `scroll-behavior: smooth` from index.css:
- *
- *   @layer base {
- *     html {
- * -     scroll-behavior: smooth;   ← remove or Lenis conflicts
- *     }
- *   }
- *
- * Lenis handles smooth scrolling itself.
- */
