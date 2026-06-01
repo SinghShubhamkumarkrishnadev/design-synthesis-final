@@ -56,33 +56,33 @@ function useFonts() {
 const FAQS = [
   {
     id: 1,
-    q: "How are Bob Snail snacks different from others?",
-    a: "Bob Snail snacks are made purely from fruit without any added sugar, preservatives, or colorants. We use a low-temperature baking process to preserve all the natural vitamins and nutrients.",
+    q: "What services does your interior design and architecture firm offer?",
+    a: "We provide comprehensive architecture, interior design, space planning, renovation, landscape design, 3D visualization, project management, and turnkey execution services for residential and commercial projects.",
   },
   {
     id: 2,
-    q: "What ingredients are used in Bob Snail products?",
-    a: "Only 100% real fruits and berries! No hidden additives, no thickeners, and absolutely no artificial flavorings. Just pure nature in every bite.",
+    q: "Can you handle both design and construction?",
+    a: "Yes, we offer end-to-end solutions, from concept development and design documentation to construction supervision and final project delivery, ensuring a seamless experience for our clients.",
   },
   {
     id: 3,
-    q: "Are Bob Snail products gluten-free?",
-    a: "Yes, all Bob Snail snacks are naturally gluten-free and processed in facilities that prevent cross-contamination, making them completely safe for celiac diets.",
+    q: "How long does a typical project take?",
+    a: "Project timelines vary depending on the scope and complexity. Interior design projects typically take 6–16 weeks, while architectural projects may require several months from design development to completion.",
   },
   {
     id: 4,
-    q: "Are the products suitable for vegans and vegetarians?",
-    a: "Absolutely! Our snacks contain 100% plant-based ingredients with zero animal-derived components, making them ideal for both vegans and vegetarians.",
+    q: "Do you work on residential and commercial projects?",
+    a: "Absolutely. We specialize in homes, apartments, villas, offices, retail stores, restaurants, hospitality spaces, and other commercial environments tailored to each client's needs.",
   },
   {
     id: 5,
-    q: "What does 'no added sugar' mean?",
-    a: "It means we never add granulated sugar, syrups, or artificial sweeteners. Any sweetness you taste comes entirely from the natural sugars present within the fruits.",
+    q: "Can you work within my budget?",
+    a: "Yes. We carefully plan every project around your budget, providing transparent cost estimates and design solutions that maximize value without compromising quality or functionality.",
   },
   {
     id: 6,
-    q: "Are Bob Snail products kosher?",
-    a: "Yes, our manufacturing processes and ingredients are certified kosher. Please check individual packaging for specific certification stamps.",
+    q: "What is your design process?",
+    a: "Our process includes consultation, site analysis, concept development, design presentation, material selection, technical drawings, execution planning, and final project handover, with regular client collaboration throughout.",
   },
 ];
 
