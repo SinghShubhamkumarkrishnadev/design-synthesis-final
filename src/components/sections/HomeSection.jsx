@@ -6,7 +6,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const CLOUDS = [
   {
-    src: "/home/cloud1.png",
+    src: "/home/cloud1.webp",
     style: {
       top: "2%",
       left: "-5%",
@@ -18,7 +18,7 @@ const CLOUDS = [
     parallax: 180, 
   },
   {
-    src: "/home/cloud2.png",
+    src: "/home/cloud2.webp",
     style: {
       top: "0%",
       left: "35%",
@@ -30,7 +30,7 @@ const CLOUDS = [
     parallax: 240,
   },
   {
-    src: "/home/cloud3.png",
+    src: "/home/cloud3.webp",
     style: {
       top: "4%",
       left: "-18%",
@@ -42,7 +42,7 @@ const CLOUDS = [
     parallax: 140,
   },
   {
-    src: "/home/cloud4.png",
+    src: "/home/cloud4.webp",
     style: {
       top: "22%",
       left: "-10%",
@@ -243,10 +243,10 @@ export default function HomeSection() {
             <h1 className="hs-title">DESIGN SYNTHESIS</h1>
           </div>
           <picture ref={scenePicRef} className="hs-scene-picture">
-            <source media="(max-width: 768px)" srcSet="/home/beachMobile.png" />
+            <source media="(max-width: 768px)" srcSet="/home/beachMobile.webp" />
             <img
               ref={sceneImgRef}
-              src="/home/beachDesktop.png"
+              src="/home/beachDesktop.webp"
               alt="Modern coastal house"
               className="hs-scene-img"
             />
