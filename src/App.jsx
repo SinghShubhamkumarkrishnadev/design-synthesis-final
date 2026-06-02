@@ -1,5 +1,3 @@
-// App.jsx
-
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
@@ -44,24 +42,24 @@ function AppInner() {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // ── FIX: Freeze scroll during loading screen, resume when done ──
-  useEffect(() => {
-    // Block scroll immediately (loading screen is showing)
-    stop();
-  }, [stop]);
-
   useEffect(() => {
     if (isLoaded) {
-      // Unlock scroll as soon as the loading screen finishes
-      start();
+      document.documentElement.classList.remove("scroll-locked");
     }
-  }, [isLoaded, start]);
+  }, [isLoaded]);
 
   // Track active section via IntersectionObserver after load completes
   useEffect(() => {
     if (!isLoaded) return;
 
-    const sectionIds = ["home", "about", "services", "works", "testimonials", "contact"];
+    const sectionIds = [
+      "home",
+      "about",
+      "services",
+      "works",
+      "testimonials",
+      "contact",
+    ];
 
     const observer = new IntersectionObserver(
       (entries) =>
@@ -84,7 +82,8 @@ function AppInner() {
     if (!isLoaded) return;
 
     const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const totalScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
       if (totalScroll > 0)
         setScrollProgress((window.scrollY / totalScroll) * 100);
     };
@@ -111,7 +110,6 @@ function AppInner() {
           style={{ zIndex: 50 }}
         >
           <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto w-full px-4 sm:px-6 md:px-16 xl:px-24 flex flex-row items-center justify-between gap-4 relative">
-
             {/* Logo */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -119,7 +117,9 @@ function AppInner() {
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
               className="flex items-center gap-2 sm:gap-3 pointer-events-auto select-none group cursor-pointer"
               onClick={() => {
-                document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
+                document
+                  .getElementById("home")
+                  ?.scrollIntoView({ behavior: "smooth" });
                 setActiveSection("home");
               }}
             >
@@ -153,8 +153,16 @@ function AppInner() {
             <motion.div
               className="pointer-events-auto flex-shrink-0 z-10"
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={isLoaded ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+              animate={
+                isLoaded
+                  ? { opacity: 1, scale: 1, y: 0 }
+                  : { opacity: 0, scale: 0.95, y: -10 }
+              }
+              transition={{
+                duration: 0.8,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.3,
+              }}
             >
               <PillBase
                 activeSection={activeSection}
@@ -165,22 +173,35 @@ function AppInner() {
           </div>
         </header>
 
-        <main className="w-full">
-          <section id="home">
+        <main className="w-full relative">
+          {/* Explicit Home Layout Container */}
+          <div id="home" className="w-full relative block">
             <HomeSection isLoaded={isLoaded} />
-          </section>
+          </div>
 
+          {/* Subsequent layout stitched cleanly beneath without overlapping gaps */}
           <motion.div
-            initial={{ y: 40, opacity: 0 }}
-            animate={isLoaded ? { y: 0, opacity: 1 } : { y: 40, opacity: 0 }}
-            transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={isLoaded ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+            className="relative z-30 bg-[#050d07] w-full block"
           >
-            <section id="about"><AboutSection /></section>
-            <section id="services"><ServicesSection /></section>
-            <section id="works"><WorksSection /></section>
-            <section id="testimonials"><TestimonialsSection /></section>
+            <section id="about" className="relative w-full block">
+              <AboutSection />
+            </section>
+            <section id="services" className="relative w-full block">
+              <ServicesSection />
+            </section>
+            <section id="works" className="relative w-full block">
+              <WorksSection />
+            </section>
+            <section id="testimonials" className="relative w-full block">
+              <TestimonialsSection />
+            </section>
             <FAQSection />
-            <section id="contact"><ContactSection /></section>
+            <section id="contact" className="relative w-full block">
+              <ContactSection />
+            </section>
             <Footer />
           </motion.div>
         </main>

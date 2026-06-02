@@ -10,3 +10,8 @@
      */
   }
 }
+
+html.scroll-locked,
+html.scroll-locked body {
+  overflow: hidden !important;
+}
