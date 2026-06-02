@@ -65,10 +65,24 @@ export default function HomeSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 1. Initial Position Setup via GSAP
-      gsap.set(titleWrapRef.current, { opacity: 0, y: 60, scale: 1.05, xPercent: -50 });
-      gsap.set(scenePicRef.current, { xPercent: -50 });
-      gsap.set(sceneImgRef.current, { opacity: 0, y: 60 });
+      // 1. Initial Position Setup via GSAP (GSAP handles centering natively now)
+      gsap.set(titleWrapRef.current, { 
+        left: "50%",
+        xPercent: -50,
+        opacity: 0, 
+        y: 60, 
+        scale: 1.05 
+      });
+      
+      gsap.set(scenePicRef.current, { 
+        left: "50%",
+        xPercent: -50 
+      });
+      
+      gsap.set(sceneImgRef.current, { 
+        opacity: 0, 
+        y: 60 
+      });
       
       cloudRefs.current.forEach((el, i) => {
         if (el) {
@@ -121,7 +135,7 @@ export default function HomeSection() {
         }
       });
 
-      // 4. Parallax Scroll Actions (No Black Screens)
+      // 4. Parallax Scroll Actions
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: wrapperRef.current,
@@ -134,7 +148,7 @@ export default function HomeSection() {
         }
       });
 
-      // Pulls title up natively without altering its solid opacity settings
+      // Pulls title up natively without altering horizontal alignment
       scrollTl.to(titleWrapRef.current, {
         y: "-110vh",
         ease: "none"
@@ -168,18 +182,24 @@ export default function HomeSection() {
         .hs-sky { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, #7ab8d8 0%, #f5deb0 100%); }
         .hs-cloud { position: absolute; pointer-events: none; aspect-ratio: 3 / 2; will-change: transform, opacity; z-index: 2; display: block; height: auto; }
         
-        .hs-title-wrap { position: absolute; z-index: 3; bottom: 42%; left: 50%; width: 100%; text-align: center; transform: translateX(-50%); pointer-events: none; }
+        /* Cleaned up centering CSS to let GSAP handle horizontal alignments safely */
+        .hs-title-wrap { 
+          position: absolute; 
+          z-index: 3; 
+          bottom: 42%; 
+          width: 100%; 
+          text-align: center; 
+          pointer-events: none; 
+        }
         .hs-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 9vw, 160px); color: #ffffff !important; opacity: 1 !important; line-height: 1; letter-spacing: -0.02em; }
         
         .hs-scene-picture { 
           position: absolute; 
           z-index: 4; 
-          left: 50%; 
-          width: 100vw; 
+          width: 100%; 
           height: 105%; 
           pointer-events: none; 
           bottom: -18vh;
-          transform: translateX(-50%);
         }
 
         @media (max-width: 1024px) {
